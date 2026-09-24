@@ -24,18 +24,18 @@
 </head>
 <body>
 <main class="wrap">
-<header class="top"><div><div class="brand">HomeFirst90 <span class="tag">working brand</span></div><div class="tag">Your first 90 days at home · UK-first MVP</div></div><nav class="nav"><a href="#tools">Free tools</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Buy first</a><a href="/first-90-days-planner.html">90 days</a><a href="#fullapp">Full app</a><button id="install" class="hidden">Install app</button></nav></header>
+<header class="top"><div><div class="brand">HomeFirst90 <span class="tag">working brand</span></div><div class="tag">Your first 90 days at home · UK-first MVP</div></div><nav class="nav"><a href="#tools">Free tools</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Buy first</a><a href="/first-90-days-planner.html">90 days</a><button id="install" class="hidden">Install app</button></nav></header>
 
 <section class="hero">
 <div class="hero-main">
 <div class="eyebrow">Free new-home planning tool</div>
 <h1>How much will your new home cost to set up — and what should you buy first?</h1>
 <p>Build a personalised setup budget in minutes. HomeFirst90 works out what you actually need, what can wait, and how to stretch the money you have without buying a houseful of stuff you do not need.</p>
-<div class="actions"><a class="btn btn-light" href="#calculator">Calculate my setup cost</a><a class="btn btn-ghost" href="#fullapp">See what’s coming</a></div>
+<div class="actions"><a class="btn btn-light" href="#calculator">Calculate my setup cost</a><a class="btn btn-ghost" href="#tools">Explore the free tools</a></div>
 </div>
 <div class="side">
 <div class="card"><div class="eyebrow" style="color:var(--green)">The free hook</div><h2>New Home Setup Cost</h2><p>A useful answer first. Not just furniture: appliances, bedding, cookware, cleaning, home-office basics and the things that make the home actually work.</p></div>
-<div class="card price-card" id="fullapp"><div class="eyebrow">Full app coming later</div><h2 style="font-size:30px;margin:8px 0 10px">We’re proving the free tools first.</h2><p>The planned app will let you save your home, share it, track purchases and keep the whole first-90-days plan in one place. Pricing will only be added once the product is genuinely ready to buy.</p></div>
+<div class="card price-card"><div class="eyebrow">One connected home</div><h2 style="font-size:30px;margin:8px 0 10px">Describe it once. Use it everywhere.</h2><p>Save your home on this device, then reuse that plan in tools such as Buy First. Shared access and purchase tracking can come later if people actually want them.</p></div>
 </div>
 </section>
 
@@ -92,18 +92,18 @@
 <div class="result-head"><div><div class="tag">Estimated setup cost</div><div class="big" id="grand">£0</div></div><div class="pill" id="budgetPill"></div></div>
 <div class="stats"><div class="stat"><span>Need now</span><b id="now">£0</b></div><div class="stat"><span>First 30 days</span><b id="month">£0</b></div><div class="stat"><span>Can wait</span><b id="later">£0</b></div></div>
 <div class="bar"><div id="coverBar"></div></div><p class="tag" id="coverText" style="margin-top:6px"></p><div id="warning" class="warning hidden"></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" style="background:var(--green);color:#fff" id="save" type="button">Save this home</button><button class="btn" style="background:var(--green2);color:var(--green)" id="unlock" type="button">Preview £9.99 full app</button></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" style="background:var(--green);color:#fff" id="save" type="button">Save this home</button><a class="btn" style="background:var(--green2);color:var(--green)" href="/what-to-buy-first.html">What should I buy first?</a><a class="btn" style="background:#fff;border:1px solid var(--line);color:var(--green)" href="/first-90-days-planner.html">Plan my first 90 days</a></div>
 <div class="rooms" id="rooms"></div>
 </div>
 </div>
 </section>
 
-<section class="premium" id="premium">
-<h2>What the paid app adds</h2>
-<p class="muted">The free website earns the visitor. The future app will be about saving the whole home and making decisions from the same data.</p>
+<section class="premium" id="continue">
+<h2>Continue with your home</h2>
+<p class="muted">Once the setup estimate makes sense, use the next free tool instead of starting again from scratch.</p>
 <div class="premium-grid">
-<div class="premium-card locked"><div class="lock">PREVIEW LOCKED</div><h3>What should I buy first?</h3><p class="muted">Protect essentials first and fit the next best purchases inside your actual usable budget.</p><div id="priority" class="priority-list hidden"></div></div>
-<div class="premium-card locked"><div class="lock">PREVIEW LOCKED</div><h3>Your first 90 days</h3><p class="muted">A simple settling-in plan based on the home and household you entered.</p><div id="timeline" class="timeline hidden"></div></div>
+<div class="premium-card"><div class="lock">FREE TOOL</div><h3>What should I buy first?</h3><p class="muted">Protect essentials first and fit the next best purchases inside your actual usable budget. If you saved this home, the tool can use your missing-item list.</p><a class="btn" style="margin-top:12px;background:var(--green);color:#fff" href="/what-to-buy-first.html">Open Buy First</a></div>
+<div class="premium-card"><div class="lock">FREE TOOL</div><h3>Your first 90 days</h3><p class="muted">Generate a practical settling-in plan for an owner or renter, with children, pets, home working and outdoor space where relevant.</p><a class="btn" style="margin-top:12px;background:var(--green);color:#fff" href="/first-90-days-planner.html">Open 90 Days Planner</a></div>
 </div>
 </section>
 
@@ -130,7 +130,7 @@ const base=[
 ["Whole home","Vacuum",130,"now",90],["Whole home","Basic tool kit",60,"month",67],["Whole home","Lamps & bulbs",60,"month",70],["Whole home","Extension leads",30,"now",82],["Whole home","Doormat & small storage",50,"later",30],
 ["Office","Desk",130,"month",72],["Office","Chair",150,"month",78],["Children","Child bedroom basics",300,"now",92]
 ];
-let rows=[],profile=null,unlocked=false;
+let rows=[],profile=null;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
 function build(){
  const b=+q("#bedrooms").value,a=+q("#adults").value,c=+q("#children").value,w=+q("#wfh").value,t=+q("#tier").value,u=+q("#used").value,f=q("#furnishing").value;
@@ -155,30 +155,14 @@ function render(){
  q("#grand").textContent=GBP.format(total);q("#now").textContent=GBP.format(now);q("#month").textContent=GBP.format(month);q("#later").textContent=GBP.format(later);
  const diff=usable-total;q("#budgetPill").textContent=diff>=0?GBP.format(diff)+" spare after buffer":GBP.format(Math.abs(diff))+" short after buffer";
  const cover=total?Math.min(100,Math.round(usable/total*100)):100;q("#coverBar").style.width=cover+"%";q("#coverText").textContent="Your usable budget covers about "+cover+"% of this setup estimate.";
- if(usable<now){q("#warning").classList.remove("hidden");q("#warning").textContent="Your usable budget is "+GBP.format(usable)+", while 'need now' items total about "+GBP.format(now)+". The paid Buy First tool protects essentials and defers lower-priority purchases."}else q("#warning").classList.add("hidden");
+ if(usable<now){q("#warning").classList.remove("hidden");q("#warning").textContent="Your usable budget is "+GBP.format(usable)+", while 'need now' items total about "+GBP.format(now)+". The Buy First tool protects essentials and moves lower-priority purchases into Buy Later."}else q("#warning").classList.add("hidden");
  const groups={};rows.forEach(r=>(groups[r.room]??=[]).push(r));
  q("#rooms").innerHTML=Object.entries(groups).map(([room,rs])=>'<div class="room"><div class="room-head"><span>'+room+'</span><span>'+GBP.format(rs.reduce((s,r)=>s+r.cost,0))+'</span></div>'+rs.map(r=>'<div class="item"><div><b>'+r.name+(r.qty>1?" × "+r.qty:"")+'</b><small>'+({now:"Need now",month:"First 30 days",later:"Can wait"}[r.stage])+(r.owned?" · already covered":"")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>').join("")+'</div>').join("");
- renderPremium();
-}
-function renderPremium(){
- if(!unlocked)return;
- const usable=Math.max(0,profile.budget-profile.buffer);let left=usable;
- const needed=rows.filter(r=>!r.owned).sort((a,b)=>({now:0,month:1,later:2}[a.stage]-({now:0,month:1,later:2}[b.stage]))||b.priority-a.priority);
- q("#priority").innerHTML=needed.map((r,i)=>{const buy=r.cost<=left;if(buy)left-=r.cost;return '<div class="priority"><div class="rank">'+(i+1)+'</div><div><b>'+r.name+'</b><small>'+r.room+' · '+(buy?"fits current budget":"defer for now")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>'}).join("");
- const phases=[
- ["First 48 hours","Meter readings, utilities, sleep/bathroom/kitchen essentials and basic safety."],
- ["Week 1","Buy only the highest-priority missing essentials and test broadband/mobile signal."],
- ["Days 8–30","Measure before larger purchases, sort curtains/lighting and compare first real bills."],
- ["Days 31–60","Review what you still have not bought and tackle comfort/storage only where needed."],
- ["Days 61–90","Review total setup spend, sell duplicates and set an ongoing home-maintenance budget."]
- ];
- q("#timeline").innerHTML=phases.map(x=>'<div class="phase"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
 }
 q("#form").addEventListener("submit",e=>{e.preventDefault();build();q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
-q("#unlock").addEventListener("click",()=>{unlocked=true;qa(".premium-card").forEach(x=>x.classList.remove("locked"));qa(".lock").forEach(x=>x.textContent="PREVIEW UNLOCKED");q("#priority").classList.remove("hidden");q("#timeline").classList.remove("hidden");q("#unlock").textContent="Full app preview unlocked";renderPremium()});
-q("#save").addEventListener("click",()=>{if(!profile)return;localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows,unlocked}));q("#save").textContent="Saved ✓"});
+q("#save").addEventListener("click",()=>{if(!profile)return;localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows}));q("#save").textContent="Saved ✓"});
 const params=new URLSearchParams(location.search);if(params.get("bedrooms"))q("#bedrooms").value=params.get("bedrooms");if(params.get("property"))q("#property").value=params.get("property");
-try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];unlocked=!!saved.unlocked;q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");if(unlocked){qa(".premium-card").forEach(x=>x.classList.remove("locked"));qa(".lock").forEach(x=>x.textContent="PREVIEW UNLOCKED");q("#priority").classList.remove("hidden");q("#timeline").classList.remove("hidden")}render()}}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render()}}catch(e){}
 let deferred;const ib=q("#install");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.classList.remove("hidden")});ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;ib.classList.add("hidden")});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
