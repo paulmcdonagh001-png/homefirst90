@@ -22,11 +22,11 @@
 <div id="countdown" class="countdown">Add your moving date to start the countdown</div>
 </section>
 
-<section class="premium">
-<div class="chip">HOMEFIRST90 COMPLETE · COMING SOON</div>
+<section class="premium" id="completePanel">
+<div class="chip" id="completeChip">HOMEFIRST90 COMPLETE · COMING SOON</div>
 <h2 id="completeTitle">The planning was free. This is the part Complete manages.</h2>
 <p id="completeText">Complete starts where the free planning tools stop: moving day, the first 48 hours, the first week, the first month and everything that still needs doing afterwards.</p>
-<div class="price">£12.99</div><div style="font-size:13px;font-weight:800;color:#c9d7d1;margin-top:-4px">One-off. No subscription.</div>
+<div id="completePrice"><div class="price">£12.99</div><div style="font-size:13px;font-weight:800;color:#c9d7d1;margin-top:-4px">One-off. No subscription.</div></div>
 <div class="premium-grid">
 <div class="perk"><b>Moving day → Day 90</b><span>Your personalised post-move action plan, not a generic checklist.</span></div>
 <div class="perk"><b>What should I do next?</b><span>Surface the next useful actions based on where you are in the move.</span></div>
@@ -35,7 +35,7 @@
 <div class="perk"><b>Share the home</b><span>Partner or housemate access to the same plan.</span></div>
 <div class="perk"><b>Cloud My Home</b><span>Keep the plan across phones, computers and browsers.</span></div>
 </div>
-<a class="cta" href="/complete.html">See how HomeFirst90 Complete works →</a><div class="small">Complete is not available to purchase yet.</div>
+<a class="cta" id="completeCta" href="/complete.html">See how HomeFirst90 Complete works →</a><div class="small" id="completeSmall">Complete is not available to purchase yet.</div>
 </section>
 
 <section class="grid">
@@ -89,5 +89,31 @@ if(moveProfile&&moveProfile.date){
 }else{
  document.querySelector("#heroText").textContent="Use the free calculators to plan the money, then add your moving date. HomeFirst90 will build the bridge from planning into the move itself.";
 }
+
+const API="https://homefirst90-api.onrender.com";
+async function activateCompleteState(){
+ const key=localStorage.getItem("homefirst90-complete-access");
+ if(!key)return;
+ try{
+   const r=await fetch(API+"/api/access/verify",{method:"POST",headers:{"Authorization":"Bearer "+key}});
+   if(!r.ok){localStorage.removeItem("homefirst90-complete-access");return;}
+   const data=await r.json();
+   if(!data.active)return;
+   document.querySelector("#completeChip").textContent="HOMEFIRST90 COMPLETE · ACTIVE";
+   document.querySelector("#completeTitle").textContent="Your HomeFirst90 Complete access is active.";
+   document.querySelector("#completeText").textContent="This Home is linked to your paid Complete access. Your planning data can now be stored securely with your HomeFirst90 household.";
+   document.querySelector("#completePrice").style.display="none";
+   document.querySelector("#completeCta").textContent="Complete active ✓";
+   document.querySelector("#completeCta").removeAttribute("href");
+   document.querySelector("#completeSmall").textContent=(data.email?"Purchased with "+data.email+" · ":"")+"Cloud Home connection active.";
+   const payload={};
+   for(const k of ["homefirst90-home","homefirst90-moving","homefirst90-bills","homefirst90-move-profile","homefirst90-90day-checks"]){
+     try{const v=JSON.parse(localStorage.getItem(k)||"null");if(v!==null)payload[k]=v}catch(e){}
+   }
+   await fetch(API+"/api/home",{method:"PUT",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(payload)});
+ }catch(e){}
+}
+activateCompleteState();
+
 </script>
 </body></html>
