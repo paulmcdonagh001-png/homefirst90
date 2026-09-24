@@ -15,7 +15,7 @@
 </head>
 <body>
 <main class="w">
-<div class="brand"><a href="/" style="color:inherit;text-decoration:none">HomeFirst90</a></div>
+<div class="brand" style="display:flex;justify-content:space-between;gap:12px;align-items:center"><a href="/" style="color:inherit;text-decoration:none">HomeFirst90</a><a href="/my-home.html" style="font-size:13px;color:var(--green);text-decoration:none">My Home →</a></div>
 <section class="hero"><div class="ey">Free England renter tool</div><h1>How much cash do you need to move out?</h1><p>Work out the money needed around move-in: rent, deposit, moving, setting the home up and a sensible reserve. Then use HomeFirst90 to calculate the setup part properly.</p></section>
 <section class="grid">
 <div class="card">
@@ -39,7 +39,7 @@
 <div class="muted">Estimated cash needed before / around move-in</div><div class="big" id="total">£0</div>
 <div class="stats"><div class="stat"><span>Upfront move-in cash</span><b id="upfront">£0</b></div><div class="stat"><span>Reserve after move</span><b id="reserveOut">£0</b></div></div>
 <div id="breakdown"></div>
-<div id="warn" class="note"></div>
+<div id="warn" class="note"></div><div id="savedToHome" class="next" style="display:none"><b>Saved to My Home ✓</b><div class="muted">Your move-out total is now available on your HomeFirst90 dashboard.</div><a href="/my-home.html">Open My Home →</a></div>
 <div class="next"><b>Don't guess the setup-cost line.</b><div class="muted">Our main calculator works out furniture, appliances and practical essentials from the actual home.</div><a href="/#calculator">Calculate my personalised home setup →</a></div>
 </div>
 </section>
@@ -47,7 +47,7 @@
 </main>
 <script>
 const money=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
-function calc(){
+function calc(save=false){
  const rent=+document.querySelector("#rent").value||0,share=+document.querySelector("#share").value||1;
  const annual=rent*12,weekly=annual/52,capWeeks=annual>=50000?6:5;
  const cap=weekly*capWeeks;
@@ -70,8 +70,9 @@ function calc(){
  if(setup<500)warning.push("Your setup allowance is very low for someone starting mostly from scratch; use the personalised HomeFirst90 setup calculator before relying on it.");
  if(!warning.length)warning.push("This separates cash needed to get moved in from the reserve you want left afterwards. The tenancy deposit is refundable in principle, but it still ties up cash.");
  document.querySelector("#warn").textContent=warning.join(" ");
+ if(save){localStorage.setItem("homefirst90-moving",JSON.stringify({total,upfront,reserve:res,rent,share,setup,timestamp:Date.now()}));document.querySelector("#savedToHome").style.display="block";}
 }
-document.querySelector("#f").addEventListener("submit",e=>{e.preventDefault();calc()});
-calc();
+document.querySelector("#f").addEventListener("submit",e=>{e.preventDefault();calc(true)});
+calc(false);
 </script>
 </body></html>
