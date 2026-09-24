@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moving Out Budget Calculator UK (England) | HomeFirst90</title>
+<meta name="description" content="Estimate how much cash you need to move out in England: rent in advance, tenancy deposit, moving costs, home setup and an emergency reserve.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#153f33">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#17201d;--muted:#61706a;--green:#153f33;--green2:#e8f1ed;--paper:#f5f5f0;--card:#fff;--line:#dfe5e1;--amber:#fff5dc}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:980px;margin:auto;padding:24px}.brand{font-size:22px;font-weight:900;margin-bottom:28px}.hero{background:var(--green);color:#fff;border-radius:28px;padding:34px}.ey{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#c8dad2}.hero h1{font-size:48px;line-height:1.04;letter-spacing:-.045em;margin:10px 0 12px}.hero p{font-size:18px;color:#dbe8e2;max-width:780px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px}.card h2{margin:0 0 8px;font-size:28px}.muted{color:var(--muted)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;border:1px solid #ccd6d0;border-radius:11px;padding:11px;font:inherit;background:#fff}.btn{width:100%;border:0;background:var(--green);color:#fff;border-radius:13px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;margin-top:12px}.big{font-size:44px;font-weight:950;letter-spacing:-.05em}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.stat{background:#f1f5f2;border-radius:13px;padding:12px}.stat span{font-size:11px;color:var(--muted);display:block}.stat b{font-size:19px}.line{display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--line);padding:10px 0;font-size:14px}.note{background:var(--amber);border-radius:12px;padding:12px;font-size:13px;margin-top:12px}.next{margin-top:14px;background:#edf4f0;border-radius:16px;padding:16px}.next a{display:inline-block;margin-top:8px;background:#fff;color:var(--green);text-decoration:none;font-weight:900;padding:11px 14px;border-radius:11px}.legal{font-size:12px;color:var(--muted);margin-top:18px}.legal a{color:var(--green);font-weight:700}@media(max-width:700px){.hero{padding:24px}.hero h1{font-size:36px}.grid,.fields,.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="w">
+<div class="brand"><a href="/" style="color:inherit;text-decoration:none">HomeFirst90</a></div>
+<section class="hero"><div class="ey">Free England renter tool</div><h1>How much cash do you need to move out?</h1><p>Work out the money needed around move-in: rent, deposit, moving, setting the home up and a sensible reserve. Then use HomeFirst90 to calculate the setup part properly.</p></section>
+<section class="grid">
+<div class="card">
+<h2>Build your move-out number</h2>
+<p class="muted">Use the property's full rent. If you're sharing, tell us your approximate share.</p>
+<form id="f">
+<div class="fields">
+<div class="field"><label>Property monthly rent (£)</label><input id="rent" type="number" min="0" step="25" value="1200"></div>
+<div class="field"><label>Your share of household costs</label><select id="share"><option value="1">100%</option><option value=".75">75%</option><option value=".5" selected>50%</option><option value=".333">33%</option><option value=".25">25%</option></select></div>
+<div class="field"><label>Tenancy deposit requested (£)</label><input id="deposit" type="number" min="0" step="25" placeholder="Leave blank to estimate legal cap"></div>
+<div class="field"><label>Rent due before move-in (£)</label><input id="advance" type="number" min="0" step="25" placeholder="Leave blank for 1 month"></div>
+<div class="field"><label>Moving / van cost (£)</label><input id="moving" type="number" min="0" step="25" value="250"></div>
+<div class="field"><label>Home setup estimate (£)</label><input id="setup" type="number" min="0" step="100" value="2500"></div>
+<div class="field"><label>Other upfront costs (£)</label><input id="other" type="number" min="0" step="25" value="100"></div>
+<div class="field"><label>Emergency reserve</label><select id="reserve"><option value="0">None</option><option value="1" selected>1 month of my rent</option><option value="2">2 months of my rent</option><option value="3">3 months of my rent</option></select></div>
+</div>
+<button class="btn" type="submit">Calculate my move-out cash</button>
+</form>
+</div>
+<div class="card">
+<div class="muted">Estimated cash needed before / around move-in</div><div class="big" id="total">£0</div>
+<div class="stats"><div class="stat"><span>Upfront move-in cash</span><b id="upfront">£0</b></div><div class="stat"><span>Reserve after move</span><b id="reserveOut">£0</b></div></div>
+<div id="breakdown"></div>
+<div id="warn" class="note"></div>
+<div class="next"><b>Don't guess the setup-cost line.</b><div class="muted">Our main calculator works out furniture, appliances and practical essentials from the actual home.</div><a href="/#calculator">Calculate my personalised home setup →</a></div>
+</div>
+</section>
+<p class="legal"><b>England only.</b> This is a planning calculator, not legal or financial advice. Current government guidance says a tenancy deposit is generally capped at five weeks' rent where annual rent is under £50,000 and six weeks from £50,000 to £100,000. For most new assured periodic tenancies, rent in advance is generally limited to one month after the tenancy is signed. A holding deposit can be up to one week's rent and is normally refunded or credited, so this calculator does not automatically add it again. Check your own agreement and the latest official guidance: <a href="https://www.gov.uk/guidance/tenant-fees-act-2019-guidance-for-tenants">GOV.UK tenant fees guidance</a>.</p>
+</main>
+<script>
+const money=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
+function calc(){
+ const rent=+document.querySelector("#rent").value||0,share=+document.querySelector("#share").value||1;
+ const annual=rent*12,weekly=annual/52,capWeeks=annual>=50000?6:5;
+ const cap=weekly*capWeeks;
+ const depInput=document.querySelector("#deposit").value;
+ const advInput=document.querySelector("#advance").value;
+ const deposit=depInput===""?cap:(+depInput||0);
+ const advance=advInput===""?rent:(+advInput||0);
+ const moving=+document.querySelector("#moving").value||0,setup=+document.querySelector("#setup").value||0,other=+document.querySelector("#other").value||0;
+ const reserveMonths=+document.querySelector("#reserve").value||0;
+ const myRent=rent*share,myDeposit=deposit*share,myAdvance=advance*share,myMoving=moving*share,mySetup=setup*share,myOther=other*share;
+ const upfront=myDeposit+myAdvance+myMoving+mySetup+myOther,res=myRent*reserveMonths,total=upfront+res;
+ document.querySelector("#total").textContent=money(total);
+ document.querySelector("#upfront").textContent=money(upfront);
+ document.querySelector("#reserveOut").textContent=money(res);
+ document.querySelector("#breakdown").innerHTML=[
+ ["Your share of tenancy deposit",myDeposit],["Your share of rent before move-in",myAdvance],["Moving / van",myMoving],["Home setup",mySetup],["Other upfront costs",myOther]
+ ].map(x=>'<div class="line"><span>'+x[0]+'</span><b>'+money(x[1])+'</b></div>').join("");
+ const warning=[];
+ if(depInput!=="" && deposit>cap+1)warning.push("The deposit entered is above the standard England cap calculated from this rent. Check the tenancy type and current rules.");
+ if(setup<500)warning.push("Your setup allowance is very low for someone starting mostly from scratch; use the personalised HomeFirst90 setup calculator before relying on it.");
+ if(!warning.length)warning.push("This separates cash needed to get moved in from the reserve you want left afterwards. The tenancy deposit is refundable in principle, but it still ties up cash.");
+ document.querySelector("#warn").textContent=warning.join(" ");
+}
+document.querySelector("#f").addEventListener("submit",e=>{e.preventDefault();calc()});
+calc();
+</script>
+</body></html>
