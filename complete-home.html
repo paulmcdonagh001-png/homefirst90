@@ -86,4 +86,5 @@ function render(){
 }
 document.querySelector("#codeBtn").addEventListener("click",async()=>{const k=document.querySelector("#codeInput").value.trim();if(!k)return;key=k;localStorage.setItem("homefirst90-complete-access",k);if(await verify())load();else document.querySelector("#codeMsg").textContent="That code could not be verified."});
 load();
-</script></body></html>
+</script><script src="/analytics.js" defer></script>
+</body></html>
