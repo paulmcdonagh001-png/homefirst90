@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HomeFirst90 — New Home Setup Cost Calculator</title>
+<meta name="description" content="Estimate the cost of setting up your new home, see what to buy first, and plan your first 90 days.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#153f33">
+<meta property="og:title" content="HomeFirst90 — Set up your new home without blowing the budget">
+<meta property="og:description" content="Free personalised new-home setup calculator, checklist and budget planner.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#17201d;--muted:#61706a;--green:#153f33;--green2:#e8f1ed;--paper:#f5f5f0;--card:#fff;--line:#dfe5e1;--soft:#f1f5f2;--amber:#fff5dc;--red:#fff0ee}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:20px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:6px 0 16px}.brand{font-size:22px;font-weight:900;letter-spacing:-.03em}.tag{font-size:12px;color:var(--muted);font-weight:700}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.nav button{border:0;background:transparent;text-decoration:none;color:var(--muted);font:700 13px inherit;padding:8px 10px;border-radius:999px;cursor:pointer}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:14px}.hero-main{background:var(--green);color:#fff;border-radius:28px;padding:34px;position:relative;overflow:hidden}.hero-main:after{content:"";position:absolute;width:310px;height:310px;border-radius:50%;background:rgba(255,255,255,.055);right:-120px;top:-120px}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;opacity:.78}.hero h1{font-size:52px;line-height:1.01;letter-spacing:-.055em;margin:12px 0 16px;max-width:790px}.hero p{font-size:17px;line-height:1.55;color:rgba(255,255,255,.84);max-width:750px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:0;border-radius:14px;padding:14px 18px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn-light{background:#fff;color:var(--green)}.btn-ghost{border:1px solid rgba(255,255,255,.38);color:#fff;background:transparent}.side{display:grid;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px}.card h2,.card h3{margin:0 0 8px}.card p{color:var(--muted);margin:0}.price-card{background:#101f1a;color:#fff;border:0}.price-card p{color:rgba(255,255,255,.72)}.price{font-size:42px;font-weight:950;letter-spacing:-.05em;margin:5px 0}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 26px}.feature{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.feature b{display:block;margin-bottom:4px}.feature span{font-size:12px;color:var(--muted)}
+.tool{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px}.panel h2{font-size:30px;letter-spacing:-.035em;margin:0 0 8px}.muted{color:var(--muted)}.section{background:var(--soft);border-radius:16px;padding:14px;margin-top:12px}.section h3{font-size:15px;margin:0 0 10px}.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin:0 0 5px}.field select,.field input{width:100%;border:1px solid #ccd6d0;background:#fff;color:var(--ink);border-radius:11px;padding:12px;font:inherit;min-height:44px}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;font-size:13px}.primary{width:100%;margin-top:12px;background:var(--green);color:#fff;border:0;border-radius:13px;padding:15px;font-weight:900;font-size:15px;cursor:pointer}.result-empty{padding:40px 8px;text-align:center;color:var(--muted)}.hidden{display:none!important}.result-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.big{font-size:44px;font-weight:950;letter-spacing:-.05em}.pill{display:inline-flex;border-radius:999px;padding:7px 10px;background:var(--green2);color:var(--green);font-size:12px;font-weight:850}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}.stat{background:var(--soft);border-radius:13px;padding:12px}.stat span{font-size:11px;color:var(--muted);display:block}.stat b{font-size:17px}.bar{height:10px;background:#e5eae7;border-radius:999px;overflow:hidden}.bar>div{height:100%;background:var(--green);width:0}.warning{background:var(--amber);border-radius:12px;padding:11px;font-size:13px;margin:10px 0}.rooms{display:grid;gap:9px;margin-top:12px}.room{border:1px solid var(--line);border-radius:14px;overflow:hidden}.room-head{display:flex;justify-content:space-between;padding:11px 12px;background:#fafbf9;font-weight:850}.item{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 12px;border-top:1px solid var(--line);font-size:13px}.item small{display:block;color:var(--muted)}.premium{margin-top:20px}.premium-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.premium-card{border:1px solid var(--line);border-radius:18px;padding:17px;background:#fff}.premium-card.locked{background:linear-gradient(180deg,#fff,#f4f7f5)}.lock{font-size:11px;font-weight:900;color:var(--green);background:var(--green2);display:inline-block;padding:5px 8px;border-radius:999px;margin-bottom:8px}.priority-list{display:grid;gap:7px;margin-top:12px}.priority{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px}.rank{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-weight:900}.priority small{display:block;color:var(--muted)}.timeline{display:grid;gap:8px}.phase{border-left:4px solid #d6ded9;padding:8px 10px;background:#fafbf9;border-radius:0 10px 10px 0}.phase b{display:block}.phase span{font-size:12px;color:var(--muted)}.seo{margin-top:28px}.seo h2{font-size:30px;letter-spacing:-.03em}.seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.seo a{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.seo a b{display:block;margin-bottom:5px}.seo a span{font-size:12px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:22px 0;margin-top:30px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:850px){.hero,.tool{grid-template-columns:1fr}.hero h1{font-size:42px}.features{grid-template-columns:1fr 1fr}.seo-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.wrap{padding:12px}.nav{display:none}.hero-main{padding:24px}.hero h1{font-size:36px}.features,.fields,.checks,.stats,.premium-grid,.seo-grid{grid-template-columns:1fr}.big{font-size:38px}}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"HomeFirst90","applicationCategory":"LifestyleApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"GBP"},"description":"Personalised new-home setup cost calculator and first-90-days planner."}</script>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div><div class="brand">HomeFirst90 <span class="tag">working brand</span></div><div class="tag">Your first 90 days at home · UK-first MVP</div></div><nav class="nav"><a href="#calculator">Calculator</a><a href="#fullapp">Full app</a><a href="#search">Search tools</a><button id="install" class="hidden">Install app</button></nav></header>
+
+<section class="hero">
+<div class="hero-main">
+<div class="eyebrow">Free new-home planning tool</div>
+<h1>How much will your new home cost to set up — and what should you buy first?</h1>
+<p>Build a personalised setup budget in minutes. HomeFirst90 works out what you actually need, what can wait, and how to stretch the money you have without buying a houseful of stuff you do not need.</p>
+<div class="actions"><a class="btn btn-light" href="#calculator">Calculate my setup cost</a><a class="btn btn-ghost" href="#fullapp">See the full app</a></div>
+</div>
+<div class="side">
+<div class="card"><div class="eyebrow" style="color:var(--green)">The free hook</div><h2>New Home Setup Cost</h2><p>A useful answer first. No account, no payment and no generic £5k–£20k guess.</p></div>
+<div class="card price-card" id="fullapp"><div class="eyebrow">Proposed full-app unlock</div><div class="price">£9.99</div><p>One-off purchase. Save the home, share it, track purchases and use the full first-90-days toolkit. No forever subscription.</p></div>
+</div>
+</section>
+
+<section class="features">
+<div class="feature"><b>Personalised</b><span>Property, household, furnishing level and what you already own.</span></div>
+<div class="feature"><b>Budget-led</b><span>Essentials first, lower-priority purchases deferred automatically.</span></div>
+<div class="feature"><b>One home profile</b><span>The same answers power every future tool.</span></div>
+<div class="feature"><b>First 90 days</b><span>A plan for getting properly settled without trying to buy everything on day one.</span></div>
+</section>
+
+<section id="calculator" class="tool">
+<div class="panel">
+<div class="eyebrow" style="color:var(--green)">Flagship search tool · free</div>
+<h2>New Home Setup Cost</h2>
+<p class="muted">Tell us what you're moving into and we'll build a planning estimate. Prices are broad UK estimates for validation, not live retailer quotes.</p>
+<form id="form">
+<div class="section"><h3>1. Your new home</h3><div class="fields">
+<div class="field"><label>Property</label><select id="property"><option value="flat">Flat</option><option value="house" selected>House</option></select></div>
+<div class="field"><label>Bedrooms</label><select id="bedrooms"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="field"><label>Furnishing status</label><select id="furnishing"><option value="unfurnished" selected>Unfurnished</option><option value="part">Part-furnished</option><option value="furnished">Furnished</option></select></div>
+<div class="field"><label>Adults</label><select id="adults"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+<div class="field"><label>Children</label><select id="children"><option value="0" selected>None</option><option value="1">1</option><option value="2">2</option><option value="3">3+</option></select></div>
+<div class="field"><label>Working from home</label><select id="wfh"><option value="0" selected>None</option><option value="1">1</option><option value="2">2+</option></select></div>
+</div></div>
+<div class="section"><h3>2. Buying approach</h3><div class="fields">
+<div class="field"><label>Furnishing level</label><select id="tier"><option value=".72">Keep it basic</option><option value="1" selected>Comfortable / sensible</option><option value="1.55">Spend more for quality</option></select></div>
+<div class="field"><label>Second-hand</label><select id="used"><option value="1">Mostly new</option><option value=".84" selected>Happy with used furniture</option><option value=".73">Buy used wherever sensible</option></select></div>
+<div class="field"><label>Setup budget (£)</label><input id="budget" type="number" min="0" step="100" value="5000"></div>
+<div class="field"><label>Emergency buffer (£)</label><select id="buffer"><option>0</option><option>250</option><option selected>500</option><option>1000</option></select></div>
+</div></div>
+<div class="section"><h3>3. Major things you already own</h3><div class="checks" id="owned">
+<label class="check"><input type="checkbox" value="Sofa">Sofa</label><label class="check"><input type="checkbox" value="Bed frame">Bed frame(s)</label>
+<label class="check"><input type="checkbox" value="Mattress">Mattress(es)</label><label class="check"><input type="checkbox" value="Dining table">Dining table & chairs</label>
+<label class="check"><input type="checkbox" value="Fridge freezer">Fridge/freezer</label><label class="check"><input type="checkbox" value="Washing machine">Washing machine</label>
+<label class="check"><input type="checkbox" value="Vacuum">Vacuum</label><label class="check"><input type="checkbox" value="Cookware">Cookware & tableware</label>
+<label class="check"><input type="checkbox" value="TV">TV</label><label class="check"><input type="checkbox" value="Desk">Desk / home office</label>
+</div></div>
+<button class="primary" type="submit">Calculate my setup</button>
+</form>
+</div>
+
+<div class="panel">
+<div id="empty" class="result-empty"><h3>Your result will appear here</h3><p>We'll split it into need now, first 30 days and can wait.</p></div>
+<div id="result" class="hidden">
+<div class="result-head"><div><div class="tag">Estimated setup cost</div><div class="big" id="grand">£0</div></div><div class="pill" id="budgetPill"></div></div>
+<div class="stats"><div class="stat"><span>Need now</span><b id="now">£0</b></div><div class="stat"><span>First 30 days</span><b id="month">£0</b></div><div class="stat"><span>Can wait</span><b id="later">£0</b></div></div>
+<div class="bar"><div id="coverBar"></div></div><p class="tag" id="coverText" style="margin-top:6px"></p><div id="warning" class="warning hidden"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" style="background:var(--green);color:#fff" id="save" type="button">Save this home</button><button class="btn" style="background:var(--green2);color:var(--green)" id="unlock" type="button">Preview £9.99 full app</button></div>
+<div class="rooms" id="rooms"></div>
+</div>
+</div>
+</section>
+
+<section class="premium" id="premium">
+<h2>What the paid app adds</h2>
+<p class="muted">The website earns the visitor. The paid layer is about saving the whole home and making decisions from the same data.</p>
+<div class="premium-grid">
+<div class="premium-card locked"><div class="lock">PREVIEW LOCKED</div><h3>What should I buy first?</h3><p class="muted">Protect essentials first and fit the next best purchases inside your actual usable budget.</p><div id="priority" class="priority-list hidden"></div></div>
+<div class="premium-card locked"><div class="lock">PREVIEW LOCKED</div><h3>Your first 90 days</h3><p class="muted">A simple settling-in plan based on the home and household you entered.</p><div id="timeline" class="timeline hidden"></div></div>
+</div>
+</section>
+
+<section class="seo" id="search"><div class="eyebrow" style="color:var(--green)">Search acquisition</div><h2>Different questions. One underlying home.</h2>
+<div class="seo-grid">
+<a href="/cost-to-furnish-2-bedroom-house.html"><b>Cost to furnish a 2-bedroom house</b><span>Flagship long-tail entry.</span></a>
+<a href="/new-home-setup-cost.html"><b>New home setup cost</b><span>Build the number from the household.</span></a>
+<a href="/first-home-essentials-checklist.html"><b>First-home essentials checklist</b><span>Personalised, not the same 150 items for everyone.</span></a>
+<a href="/what-to-buy-first-new-home.html"><b>What should I buy first?</b><span>Turns budget into a shopping order.</span></a>
+<a href="/furniture-budget-calculator.html"><b>Furniture budget calculator</b><span>Room by room rather than a guessed lump sum.</span></a>
+<a href="/new-home-setup-budget.html"><b>New-home setup budget</b><span>Essentials, first month and later.</span></a>
+</div></section>
+
+<footer><div><b>HomeFirst90</b> · working brand for validation</div><div>Planning estimates only · live retail pricing not connected yet</div></footer>
+</main>
+
+<script>
+const GBP=new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0});
+const base=[
+["Kitchen","Fridge freezer",430,"now",98],["Kitchen","Washing machine",360,"now",96],["Kitchen","Cookware",180,"now",94],["Kitchen","Kettle & toaster",65,"now",88],["Kitchen","Microwave",100,"month",65],["Kitchen","Bin & cleaning basics",65,"now",91],
+["Living room","Sofa",650,"month",78],["Living room","TV",420,"later",35],["Living room","TV/storage unit",120,"later",28],["Living room","Lighting",70,"month",72],["Living room","Curtains/blinds",150,"month",74],
+["Bedroom","Bed frame",260,"now",96],["Bedroom","Mattress",430,"now",99],["Bedroom","Wardrobe/storage",220,"month",76],["Bedroom","Bedding",95,"now",94],["Bedroom","Curtains/blinds",100,"month",73],
+["Dining","Dining table",320,"later",42],["Bathroom","Towels & bathroom basics",85,"now",89],["Bathroom","Storage",55,"month",54],
+["Whole home","Vacuum",160,"now",90],["Whole home","Basic tool kit",70,"month",67],["Whole home","Lamps & bulbs",75,"month",70],["Whole home","Extension leads",35,"now",82],["Whole home","Doormat & small storage",55,"later",30],
+["Office","Desk",170,"month",72],["Office","Chair",180,"month",78],["Children","Child bedroom basics",350,"now",92]
+];
+let rows=[],profile=null,unlocked=false;
+const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+function build(){
+ const b=+q("#bedrooms").value,a=+q("#adults").value,c=+q("#children").value,w=+q("#wfh").value,t=+q("#tier").value,u=+q("#used").value,f=q("#furnishing").value;
+ const own=new Set(qa("#owned input:checked").map(x=>x.value));
+ rows=[];
+ base.forEach((x,i)=>{
+  if(x[0]==="Office"&&!w)return;if(x[0]==="Children"&&!c)return;
+  let qty=1;if(x[0]==="Bedroom"&&(x[1]==="Bed frame"||x[1]==="Mattress"||x[1]==="Bedding"))qty=Math.max(1,b);
+  if(x[0]==="Bedroom"&&x[1]==="Wardrobe/storage")qty=Math.max(1,Math.ceil(b*.75));
+  if(x[0]==="Children")qty=Math.max(1,c);
+  let auto=false;if(f==="furnished"&&["Sofa","Bed frame","Dining table","Wardrobe/storage"].includes(x[1]))auto=true;
+  if(f==="part"&&["Bed frame","Dining table"].includes(x[1]))auto=true;
+  let factor=t;if(["Sofa","Bed frame","Dining table","Wardrobe/storage","TV/storage unit","Desk","Chair"].includes(x[1]))factor*=u;
+  const owned=own.has(x[1])||auto;
+  rows.push({id:i,room:x[0],name:x[1],unit:Math.round(x[2]*factor),qty,stage:x[3],priority:x[4],owned,cost:owned?0:Math.round(x[2]*factor)*qty});
+ });
+ profile={bedrooms:b,adults:a,children:c,wfh:w,budget:+q("#budget").value||0,buffer:+q("#buffer").value||0};
+}
+function totals(stage){return rows.filter(r=>!stage||r.stage===stage).reduce((s,r)=>s+r.cost,0)}
+function render(){
+ const total=totals(),usable=Math.max(0,profile.budget-profile.buffer),now=totals("now"),month=totals("month"),later=totals("later");
+ q("#grand").textContent=GBP.format(total);q("#now").textContent=GBP.format(now);q("#month").textContent=GBP.format(month);q("#later").textContent=GBP.format(later);
+ const diff=usable-total;q("#budgetPill").textContent=diff>=0?GBP.format(diff)+" spare after buffer":GBP.format(Math.abs(diff))+" short after buffer";
+ const cover=total?Math.min(100,Math.round(usable/total*100)):100;q("#coverBar").style.width=cover+"%";q("#coverText").textContent="Your usable budget covers about "+cover+"% of this setup estimate.";
+ if(usable<now){q("#warning").classList.remove("hidden");q("#warning").textContent="Your usable budget is "+GBP.format(usable)+", while 'need now' items total about "+GBP.format(now)+". The paid Buy First tool protects essentials and defers lower-priority purchases."}else q("#warning").classList.add("hidden");
+ const groups={};rows.forEach(r=>(groups[r.room]??=[]).push(r));
+ q("#rooms").innerHTML=Object.entries(groups).map(([room,rs])=>'<div class="room"><div class="room-head"><span>'+room+'</span><span>'+GBP.format(rs.reduce((s,r)=>s+r.cost,0))+'</span></div>'+rs.map(r=>'<div class="item"><div><b>'+r.name+(r.qty>1?" × "+r.qty:"")+'</b><small>'+({now:"Need now",month:"First 30 days",later:"Can wait"}[r.stage])+(r.owned?" · already covered":"")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>').join("")+'</div>').join("");
+ renderPremium();
+}
+function renderPremium(){
+ if(!unlocked)return;
+ const usable=Math.max(0,profile.budget-profile.buffer);let left=usable;
+ const needed=rows.filter(r=>!r.owned).sort((a,b)=>({now:0,month:1,later:2}[a.stage]-({now:0,month:1,later:2}[b.stage]))||b.priority-a.priority);
+ q("#priority").innerHTML=needed.map((r,i)=>{const buy=r.cost<=left;if(buy)left-=r.cost;return '<div class="priority"><div class="rank">'+(i+1)+'</div><div><b>'+r.name+'</b><small>'+r.room+' · '+(buy?"fits current budget":"defer for now")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>'}).join("");
+ const phases=[
+ ["First 48 hours","Meter readings, utilities, sleep/bathroom/kitchen essentials and basic safety."],
+ ["Week 1","Buy only the highest-priority missing essentials and test broadband/mobile signal."],
+ ["Days 8–30","Measure before larger purchases, sort curtains/lighting and compare first real bills."],
+ ["Days 31–60","Review what you still have not bought and tackle comfort/storage only where needed."],
+ ["Days 61–90","Review total setup spend, sell duplicates and set an ongoing home-maintenance budget."]
+ ];
+ q("#timeline").innerHTML=phases.map(x=>'<div class="phase"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
+}
+q("#form").addEventListener("submit",e=>{e.preventDefault();build();q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
+q("#unlock").addEventListener("click",()=>{unlocked=true;qa(".premium-card").forEach(x=>x.classList.remove("locked"));qa(".lock").forEach(x=>x.textContent="PREVIEW UNLOCKED");q("#priority").classList.remove("hidden");q("#timeline").classList.remove("hidden");q("#unlock").textContent="Full app preview unlocked";renderPremium()});
+q("#save").addEventListener("click",()=>{if(!profile)return;localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows,unlocked}));q("#save").textContent="Saved ✓"});
+const params=new URLSearchParams(location.search);if(params.get("bedrooms"))q("#bedrooms").value=params.get("bedrooms");if(params.get("property"))q("#property").value=params.get("property");
+try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];unlocked=!!saved.unlocked;q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");if(unlocked){qa(".premium-card").forEach(x=>x.classList.remove("locked"));qa(".lock").forEach(x=>x.textContent="PREVIEW UNLOCKED");q("#priority").classList.remove("hidden");q("#timeline").classList.remove("hidden")}render()}}catch(e){}
+let deferred;const ib=q("#install");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.classList.remove("hidden")});ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;ib.classList.add("hidden")});
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
