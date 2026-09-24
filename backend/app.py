@@ -172,7 +172,7 @@ def save_entitlement(session):
 
 ALLOWED_EVENTS = {
     "page_view","tool_run","complete_checkout_click","checkout_return",
-    "complete_open","complete_access_restored"
+    "purchase_confirmed","complete_open","complete_access_restored"
 }
 
 def record_event(event_type, path="", session_key="", metadata=None):
@@ -227,7 +227,7 @@ def stripe_webhook():
         save_entitlement(session_obj)
         if session_obj.get("id") != "cs_hf90_startup_test":
             try:
-                record_event("complete_open", "/stripe/purchase-confirmed", "", {"stage":"purchase_confirmed"})
+                record_event("purchase_confirmed", "/stripe/purchase-confirmed", "", {"stage":"purchase_confirmed"})
             except Exception:
                 pass
     elif event.get("type") == "charge.refunded":
