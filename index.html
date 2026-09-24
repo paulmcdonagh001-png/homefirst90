@@ -198,5 +198,6 @@ try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(
 let deferred;const ib=q("#install");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.classList.remove("hidden")});ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;ib.classList.add("hidden")});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
+<script src="/analytics.js" defer></script>
 </body>
 </html>
