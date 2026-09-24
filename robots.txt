@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://homefirst90.onrender.com/sitemap.xml
