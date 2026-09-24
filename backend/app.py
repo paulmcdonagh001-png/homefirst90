@@ -221,7 +221,16 @@ def home():
             except Exception: raw = {}
         return jsonify({"home": raw or {}, "email": val(row, "email", 1)})
     payload = request.get_json(silent=True) or {}
-    raw = json.dumps(payload)
+    current = val(row, "home_json", 5)
+    if isinstance(current, str):
+        try: current = json.loads(current)
+        except Exception: current = {}
+    if not isinstance(current, dict):
+        current = {}
+    if not isinstance(payload, dict):
+        return jsonify({"error": "invalid payload"}), 400
+    current.update(payload)
+    raw = json.dumps(current)
     if len(raw) > 250000:
         return jsonify({"error": "payload too large"}), 413
     conn = db()
