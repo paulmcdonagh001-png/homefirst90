@@ -361,7 +361,17 @@ def startup_self_test():
         cur.execute("DELETE FROM hf90_entitlements WHERE session_id=?", ("cs_hf90_startup_test",))
     conn.commit()
     conn.close()
+    record_event("page_view", "/__analytics_startup_test__", "startup-test", {"source":"internal"})
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("DELETE FROM hf90_events WHERE path=%s AND session_key=%s", ("/__analytics_startup_test__", "startup-test"))
+    else:
+        cur.execute("DELETE FROM hf90_events WHERE path=? AND session_key=?", ("/__analytics_startup_test__", "startup-test"))
+    conn.commit()
+    conn.close()
     print("HomeFirst90 secure entitlement self-test: passed", flush=True)
+    print("HomeFirst90 launch analytics self-test: passed", flush=True)
 
 startup_self_test()
 
