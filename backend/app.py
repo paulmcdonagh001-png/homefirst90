@@ -42,6 +42,16 @@ def init_db():
         )
         """)
         cur.execute("ALTER TABLE hf90_entitlements ADD COLUMN IF NOT EXISTS payment_intent_id TEXT")
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_events (
+            id BIGSERIAL PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            path TEXT,
+            session_key TEXT,
+            metadata_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """)
     else:
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_entitlements (
@@ -59,6 +69,16 @@ def init_db():
             cur.execute("ALTER TABLE hf90_entitlements ADD COLUMN payment_intent_id TEXT")
         except Exception:
             pass
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL,
+            path TEXT,
+            session_key TEXT,
+            metadata_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL
+        )
+        """)
     conn.commit()
     conn.close()
 
@@ -149,6 +169,53 @@ def save_entitlement(session):
     conn.commit()
     conn.close()
 
+
+ALLOWED_EVENTS = {
+    "page_view","tool_run","complete_checkout_click","checkout_return",
+    "complete_open","complete_access_restored"
+}
+
+def record_event(event_type, path="", session_key="", metadata=None):
+    metadata = metadata if isinstance(metadata, dict) else {}
+    safe_meta = {}
+    for k, v in metadata.items():
+        if k in ("source","tool","stage","referrer_kind") and isinstance(v, (str, int, float, bool)):
+            safe_meta[k] = v
+    raw = json.dumps(safe_meta)
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute(
+            "INSERT INTO hf90_events(event_type,path,session_key,metadata_json,created_at) VALUES (%s,%s,%s,%s::jsonb,NOW())",
+            (event_type, path[:200], session_key[:80], raw)
+        )
+    else:
+        cur.execute(
+            "INSERT INTO hf90_events(event_type,path,session_key,metadata_json,created_at) VALUES (?,?,?,?,?)",
+            (event_type, path[:200], session_key[:80], raw, datetime.now(timezone.utc).isoformat())
+        )
+    conn.commit()
+    conn.close()
+    print("HF90_EVENT", event_type, path[:120], flush=True)
+
+@app.route("/api/event", methods=["POST", "OPTIONS"])
+def analytics_event():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    data = request.get_json(silent=True) or {}
+    event_type = str(data.get("event") or "")
+    if event_type not in ALLOWED_EVENTS:
+        return jsonify({"ok": False, "error": "invalid event"}), 400
+    path = str(data.get("path") or "")[:200]
+    session_key = str(data.get("session") or "")[:80]
+    metadata = data.get("metadata") or {}
+    try:
+        record_event(event_type, path, session_key, metadata)
+    except Exception as e:
+        print("HF90_EVENT_ERROR", type(e).__name__, flush=True)
+        return jsonify({"ok": False}), 500
+    return jsonify({"ok": True})
+
 @app.route("/webhooks/stripe", methods=["POST"])
 def stripe_webhook():
     payload = request.get_data()
@@ -156,7 +223,13 @@ def stripe_webhook():
         return jsonify({"ok": False, "error": "invalid signature"}), 400
     event = json.loads(payload.decode("utf-8"))
     if event.get("type") in ("checkout.session.completed", "checkout.session.async_payment_succeeded"):
-        save_entitlement((event.get("data") or {}).get("object") or {})
+        session_obj = (event.get("data") or {}).get("object") or {}
+        save_entitlement(session_obj)
+        if session_obj.get("id") != "cs_hf90_startup_test":
+            try:
+                record_event("complete_open", "/stripe/purchase-confirmed", "", {"stage":"purchase_confirmed"})
+            except Exception:
+                pass
     elif event.get("type") == "charge.refunded":
         charge = (event.get("data") or {}).get("object") or {}
         if charge.get("refunded") and charge.get("payment_intent"):
