@@ -23,15 +23,52 @@
 </section>
 </main>
 <script>
+const API="https://homefirst90-api.onrender.com";
 const p=new URLSearchParams(location.search);
 const session=p.get("session_id");
-if(!session){
- document.querySelector("#statusHead").textContent="Payment reference missing";
- document.querySelector("#statusBody").textContent="This page cannot unlock Complete without a valid Stripe checkout reference.";
- document.querySelector("#statusText").textContent="No purchase has been confirmed on this page.";
-}else{
- document.querySelector("#statusHead").textContent="Stripe reference received";
- document.querySelector("#statusBody").textContent="The secure payment verification service is being connected before public sales are enabled.";
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function syncHome(accessKey){
+  const payload={};
+  const keys=["homefirst90-home","homefirst90-moving","homefirst90-bills","homefirst90-move-profile","homefirst90-90day-checks"];
+  for(const k of keys){
+    try{ const v=JSON.parse(localStorage.getItem(k)||"null"); if(v!==null)payload[k]=v; }catch(e){}
+  }
+  try{
+    await fetch(API+"/api/home",{method:"PUT",headers:{"Content-Type":"application/json","Authorization":"Bearer "+accessKey},body:JSON.stringify(payload)});
+  }catch(e){}
 }
+
+async function verify(){
+ if(!session){
+   document.querySelector("#statusHead").textContent="Payment reference missing";
+   document.querySelector("#statusBody").textContent="This page cannot unlock Complete without a valid Stripe checkout reference.";
+   document.querySelector("#statusText").textContent="No purchase has been confirmed on this page.";
+   return;
+ }
+ document.querySelector("#statusHead").textContent="Confirming your payment…";
+ document.querySelector("#statusBody").textContent="Stripe has returned you to HomeFirst90. We’re waiting for the secure payment confirmation.";
+ for(let i=0;i<20;i++){
+   try{
+     const r=await fetch(API+"/api/checkout/verify?session_id="+encodeURIComponent(session),{cache:"no-store"});
+     if(r.ok){
+       const data=await r.json();
+       if(data.paid&&data.access_key){
+         localStorage.setItem("homefirst90-complete-access",data.access_key);
+         await syncHome(data.access_key);
+         document.querySelector("#statusText").textContent="HomeFirst90 Complete is now active on this device.";
+         document.querySelector("#statusHead").textContent="Complete unlocked ✓";
+         document.querySelector("#statusBody").textContent="Your existing HomeFirst90 planning data has been linked to your paid Home. You can now continue into My Home.";
+         document.querySelector(".btn").textContent="Open my Complete Home →";
+         return;
+       }
+     }
+   }catch(e){}
+   await sleep(3000);
+ }
+ document.querySelector("#statusHead").textContent="Payment received — activation is taking a little longer";
+ document.querySelector("#statusBody").textContent="Your payment is not lost. Please wait a minute and refresh this page. HomeFirst90 only unlocks after Stripe confirms the payment securely.";
+}
+verify();
 </script>
 </body></html>
