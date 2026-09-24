@@ -1,16 +1,137 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>First 90 Days in a New Home Planner | HomeFirst90</title><meta name="description" content="Generate a personalised first 90 days new-home checklist for owners or renters, including utilities, safety, purchases, admin and settling-in tasks."><meta name="robots" content="index,follow"><meta name="theme-color" content="#153f33"><link rel="icon" href="/icon.svg" type="image/svg+xml"><style>
-:root{--g:#153f33;--m:#61706a;--p:#f5f5f0;--c:#fff;--l:#dfe5e1;--s:#f1f5f2}*{box-sizing:border-box}body{margin:0;background:var(--p);color:#17201d;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:1000px;margin:auto;padding:24px}.brand{font-size:22px;font-weight:900;margin-bottom:28px}.hero{background:var(--g);color:#fff;border-radius:28px;padding:34px}.hero h1{font-size:48px;line-height:1.03;letter-spacing:-.045em;margin:10px 0}.hero p{color:#dbe8e2;font-size:18px}.ey{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#c7d9d1}.grid{display:grid;grid-template-columns:.72fr 1.28fr;gap:14px;margin-top:14px}.card{background:#fff;border:1px solid var(--l);border-radius:20px;padding:20px}.card h2{margin:0 0 8px;font-size:28px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;font-weight:800;color:var(--m);margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;border:1px solid #ccd6d0;border-radius:11px;padding:11px;font:inherit;background:#fff}.btn{width:100%;border:0;background:var(--g);color:#fff;border-radius:13px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;margin-top:12px}.muted{color:var(--m)}.phase{border:1px solid var(--l);border-radius:16px;overflow:hidden;margin-top:10px}.ph{display:flex;justify-content:space-between;gap:10px;background:var(--s);padding:12px 14px}.ph b{font-size:16px}.ph span{font-size:12px;color:var(--m)}.task{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-top:1px solid var(--l)}.task input{margin-top:4px;transform:scale(1.15)}.task label{cursor:pointer}.task small{display:block;color:var(--m)}.done{text-decoration:line-through;opacity:.55}.summary{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#edf4f0;border-radius:14px;padding:12px 14px;margin-bottom:10px}.bar{height:8px;background:#dfe5e1;border-radius:99px;overflow:hidden;margin-top:7px}.bar div{height:100%;background:var(--g);width:0}.next{margin-top:14px;background:#edf4f0;border-radius:16px;padding:16px}.next a{display:inline-block;margin-top:8px;background:#fff;color:var(--g);text-decoration:none;font-weight:900;padding:11px 14px;border-radius:11px}@media(max-width:720px){.hero{padding:24px}.hero h1{font-size:36px}.grid,.fields{grid-template-columns:1fr}}</style></head><body><main class="w"><div class="brand" style="display:flex;justify-content:space-between;gap:12px;align-items:center"><a href="/" style="color:inherit;text-decoration:none">HomeFirst90</a><a href="/my-home.html" style="font-size:13px;color:var(--g);text-decoration:none">My Home →</a></div><section class="hero"><div class="ey">Free personalised 90-day guide</div><h1>Your first 90 days in a new home.</h1><p>See the entire personalised 90-day plan free. HomeFirst90 Complete is for managing progress, reminders, sharing and knowing what to do next.</p></section><section class="grid"><div class="card"><h2>Build my plan</h2><p class="muted">We only include tasks relevant to the home you describe.</p><div class="fields"><div class="field"><label>Move-in date</label><input id="date" type="date"></div><div class="field"><label>Tenure</label><select id="tenure"><option value="rent">Renting</option><option value="own" selected>Owner</option></select></div><div class="field"><label>Adults</label><select id="adults"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div class="field"><label>Children</label><select id="children"><option value="0" selected>None</option><option value="1">Yes</option></select></div><div class="field"><label>Pets</label><select id="pets"><option value="0" selected>None</option><option value="1">Dog/cat</option></select></div><div class="field"><label>Work from home</label><select id="wfh"><option value="0" selected>No</option><option value="1">Yes</option></select></div><div class="field"><label>Outdoor space</label><select id="garden"><option value="0" selected>No</option><option value="1">Garden / yard</option></select></div><div class="field"><label>Starting mostly from scratch?</label><select id="scratch"><option value="1" selected>Yes</option><option value="0">No</option></select></div></div><button class="btn" id="build" type="button">Generate my 90-day plan</button><div class="next"><b>Still buying the basics?</b><div class="muted">Use the Buy First tool to decide what your budget should fund before lower-priority purchases.</div><a href="/what-to-buy-first.html">Open Buy First →</a></div></div><div class="card"><div class="summary"><div><b>Your full 90-day guide</b><div class="muted" id="period"></div></div></div><div id="plan"></div><div class="next" style="margin-top:14px"><b>Want HomeFirst90 to manage this for you?</b><div class="muted">HomeFirst90 Complete will save progress across devices, remind you what is due, let a partner or housemate share the plan and surface the next few things that need attention.</div><a href="/my-home.html">See HomeFirst90 Complete →</a></div></div></section></main><script>
-const phases=[
-{n:"First 48 hours",d:0,t:[["Take meter readings and photograph them","utilities"],["Find the stopcock, fuse box / consumer unit and main controls","all"],["Check smoke and carbon-monoxide alarms","all"],["Secure doors/windows and identify every key","all"],["Get sleeping, bathroom and basic kitchen essentials usable","scratch"],["Update pet ID / microchip contact details","pets"],["Photograph condition and inventory issues","rent"]]},
-{n:"Week 1",d:7,t:[["Register / confirm council tax responsibility","all"],["Set up or confirm energy and water accounts","utilities"],["Get broadband ordered or tested","all"],["Register with a local GP if needed","all"],["Test mobile signal and home-working setup","wfh"],["Check school / childcare routes and practical routines","children"],["Agree who pays which recurring bills","multi"],["Report tenancy repairs or inventory discrepancies in writing","rent"]]},
-{n:"Days 8–30",d:30,t:[["Replace generic estimates with the first real household bills","all"],["Measure before buying larger furniture or window coverings","all"],["Buy only the next priority items your budget can support","scratch"],["Check bins, recycling days and local collection rules","all"],["Build a simple cleaning and maintenance routine","all"],["Check garden boundaries, drainage and immediate maintenance","garden"],["Set up contents / home insurance appropriate to your situation","all"],["Review subscriptions and direct debits after the move","all"]]},
-{n:"Days 31–60",d:60,t:[["Review rooms that still do not work properly before buying decoration","all"],["Finish storage only where clutter is actually causing a problem","all"],["Create a small home emergency / repair fund","all"],["Test heating before you really need it","all"],["Record appliance model/serial details and keep key receipts","all"],["Review commute, school and work-from-home costs","all"]]},
-{n:"Days 61–90",d:90,t:[["Compare total setup spend with the original budget","all"],["Sell, donate or recycle duplicate items and moving clutter","all"],["Set an ongoing annual home-maintenance allowance","own"],["List non-urgent landlord repairs to follow up","rent"],["Check whether broadband/energy choices still suit actual usage","all"],["Choose only the remaining comfort upgrades you still genuinely want","all"],["Do a final 90-day household check-in: money, chores and unfinished jobs","multi"]]}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moving Home Planner & First 90 Days | HomeFirst90</title>
+<meta name="description" content="Plan the weeks before moving for free, then see how HomeFirst90 Complete manages moving day and your first 90 days in the new home.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#153f33">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--g:#153f33;--g2:#e8f1ed;--m:#61706a;--p:#f5f5f0;--c:#fff;--l:#dfe5e1;--s:#f1f5f2;--a:#fff5dc;--ink:#17201d}
+*{box-sizing:border-box}body{margin:0;background:var(--p);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:1040px;margin:auto;padding:24px}.brand{font-size:22px;font-weight:900;margin-bottom:28px;display:flex;justify-content:space-between;gap:12px;align-items:center}.brand a{text-decoration:none;color:inherit}.brand .home{font-size:13px;color:var(--g)}.hero{background:var(--g);color:#fff;border-radius:28px;padding:34px}.ey{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#c7d9d1}.hero h1{font-size:48px;line-height:1.03;letter-spacing:-.045em;margin:10px 0}.hero p{color:#dbe8e2;font-size:18px;max-width:800px}.grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:14px;margin-top:14px}.card{background:#fff;border:1px solid var(--l);border-radius:20px;padding:20px}.card h2{margin:0 0 8px;font-size:28px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;font-weight:800;color:var(--m);margin-bottom:5px}.field input,.field select{width:100%;min-height:44px;border:1px solid #ccd6d0;border-radius:11px;padding:11px;font:inherit;background:#fff}.btn{width:100%;border:0;background:var(--g);color:#fff;border-radius:13px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;margin-top:12px}.muted{color:var(--m)}.summary{background:var(--g2);border-radius:14px;padding:13px 14px;margin-bottom:10px}.summary b{font-size:18px}.phase{border:1px solid var(--l);border-radius:16px;overflow:hidden;margin-top:10px}.ph{display:flex;justify-content:space-between;gap:10px;background:var(--s);padding:12px 14px}.ph b{font-size:16px}.ph span{font-size:12px;color:var(--m)}.task{padding:11px 13px;border-top:1px solid var(--l)}.task b{display:block}.task small{color:var(--m)}.complete{margin-top:16px;background:#101f1a;color:#fff;border-radius:22px;padding:22px}.complete h2{font-size:31px;line-height:1.08;margin:8px 0}.complete p{color:#cbd8d2}.price{font-size:38px;font-weight:950;letter-spacing:-.04em;margin:10px 0}.chip{display:inline-block;background:#e8f1ed;color:var(--g);font-size:11px;font-weight:900;padding:6px 9px;border-radius:999px}.locked{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:14px}.lockbox{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}.lockbox b{display:block;font-size:15px}.lockbox span{font-size:12px;color:#cbd8d2}.sample{margin-top:7px;font-size:12px;color:#dbe6e1}.complete a{display:inline-block;background:#fff;color:var(--g);font-weight:900;text-decoration:none;padding:12px 15px;border-radius:12px;margin-top:14px}.next{margin-top:14px;background:#edf4f0;border-radius:16px;padding:16px}.next a{display:inline-block;margin-top:8px;background:#fff;color:var(--g);text-decoration:none;font-weight:900;padding:11px 14px;border-radius:11px}@media(max-width:720px){.hero{padding:24px}.hero h1{font-size:36px}.grid,.fields,.locked{grid-template-columns:1fr}.w{padding:12px}}
+</style></head>
+<body><main class="w">
+<div class="brand"><a href="/">HomeFirst90</a><a class="home" href="/my-home.html">My Home →</a></div>
+<section class="hero">
+<div class="ey">Plan your move for free</div>
+<h1>Get ready for the keys — before moving day arrives.</h1>
+<p>Use the free planner for the build-up to your move. HomeFirst90 Complete takes over from moving day, when there is suddenly a lot more to remember, buy, update and keep on top of.</p>
+</section>
+
+<section class="grid">
+<div class="card">
+<h2>Build my move-in plan</h2>
+<p class="muted">We only include preparation that is relevant to the household you describe.</p>
+<div class="fields">
+<div class="field"><label>Move-in date</label><input id="date" type="date"></div>
+<div class="field"><label>Tenure</label><select id="tenure"><option value="rent">Renting</option><option value="own" selected>Owner</option></select></div>
+<div class="field"><label>Adults</label><select id="adults"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+<div class="field"><label>Children</label><select id="children"><option value="0" selected>None</option><option value="1">Yes</option></select></div>
+<div class="field"><label>Pets</label><select id="pets"><option value="0" selected>None</option><option value="1">Dog/cat</option></select></div>
+<div class="field"><label>Work from home</label><select id="wfh"><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+<div class="field"><label>Outdoor space</label><select id="garden"><option value="0" selected>No</option><option value="1">Garden / yard</option></select></div>
+<div class="field"><label>Starting mostly from scratch?</label><select id="scratch"><option value="1" selected>Yes</option><option value="0">No</option></select></div>
+</div>
+<button class="btn" id="build" type="button">Build my free pre-move plan</button>
+<div class="next"><b>Still working out the money?</b><div class="muted">Use the other free tools first. Your setup estimate, moving budget and monthly bills all feed into My Home.</div><a href="/my-home.html">Open My Home →</a></div>
+</div>
+
+<div class="card">
+<div class="summary"><b id="countdown">Your free pre-move plan</b><div id="period" class="muted"></div></div>
+<div id="plan"></div>
+
+<section class="complete" id="complete">
+<div class="chip">HOMEFIRST90 COMPLETE · COMING SOON</div>
+<h2>Your move is planned. Now get ready for what happens after you get the keys.</h2>
+<p id="completeIntro">We’ll build the post-move plan from the same home and household details you’ve already entered.</p>
+<div class="price">£12.99 <span style="font-size:15px;font-weight:700;letter-spacing:0">one-off · no subscription</span></div>
+<div class="locked" id="locked"></div>
+<a href="/my-home.html">See your HomeFirst90 Complete dashboard →</a>
+</section>
+</div>
+</section>
+</main>
+
+<script>
+const pre=[
+{n:"4+ weeks before",offset:-28,t:[
+["Set a realistic setup budget and keep an emergency buffer","all"],
+["Work out the cash needed for deposit, rent, moving and setup","rent"],
+["Measure key rooms, doorways and large furniture spaces","all"],
+["Start comparing broadband availability and installation lead times","all"],
+["Book removals / van or decide exactly how the move will happen","all"],
+["Plan a workable home-office location and connectivity","wfh"],
+["Check school / childcare logistics from the new address","children"],
+["Plan pet transport and the first safe area in the new home","pets"]
+]},
+{n:"1–2 weeks before",offset:-14,t:[
+["Confirm moving date, key collection and access arrangements","all"],
+["Choose the things you genuinely need on day one","all"],
+["Pack a first-night box: bedding, towels, chargers, toiletries and basic kitchen kit","all"],
+["Prepare address-change and account-update list","all"],
+["Arrange contents / home insurance to start at the right time","all"],
+["Confirm broadband order or temporary internet backup","all"],
+["Keep important tenancy / completion documents easy to reach","all"]
+]},
+{n:"Final 72 hours",offset:-3,t:[
+["Confirm movers / van, route, parking and key collection","all"],
+["Keep medicines, valuables, documents and chargers with you","all"],
+["Charge phones and keep power banks / extension leads accessible","all"],
+["Make a note to photograph meter readings on arrival","all"],
+["Keep cleaning basics and bin bags outside the main packed load","scratch"],
+["Prepare food, bowls, leads / carriers and familiar bedding for pets","pets"],
+["Save landlord / agent contact details somewhere easy to find","rent"]
+]}
 ];
-function isoToday(){const d=new Date();return d.toISOString().slice(0,10)}
-document.querySelector("#date").value=isoToday();
+
+const post=[
+{n:"Moving day + first 48 hours",d:2,t:[
+["Take meter readings and photograph them","all"],["Find the stopcock, fuse box / consumer unit and main controls","all"],["Check smoke and carbon-monoxide alarms","all"],["Secure doors/windows and identify every key","all"],["Get sleeping, bathroom and basic kitchen essentials usable","scratch"],["Photograph condition and inventory issues","rent"],["Update pet ID / microchip contact details","pets"]
+]},
+{n:"Week 1",d:7,t:[
+["Register / confirm council tax responsibility","all"],["Set up or confirm energy and water accounts","all"],["Get broadband working and test real speeds","all"],["Register with a local GP if needed","all"],["Test home-working setup in real conditions","wfh"],["Agree who pays which recurring bills","multi"],["Report tenancy repairs or inventory discrepancies in writing","rent"]
+]},
+{n:"Days 8–30",d:30,t:[
+["Replace estimated bills with the first real household bills","all"],["Buy the next priority items without blowing the setup budget","scratch"],["Check bins, recycling days and local collection rules","all"],["Build a simple cleaning and maintenance routine","all"],["Check garden boundaries, drainage and immediate maintenance","garden"],["Review subscriptions and direct debits after the move","all"]
+]},
+{n:"Days 31–60",d:60,t:[
+["Review rooms that still do not work properly before buying decoration","all"],["Finish storage only where clutter is actually causing a problem","all"],["Create a small home emergency / repair fund","all"],["Record appliance model/serial details and keep key receipts","all"],["Review commute, school and home-working costs","all"]
+]},
+{n:"Days 61–90",d:90,t:[
+["Compare total setup spend with the original budget","all"],["Sell, donate or recycle duplicate items and moving clutter","all"],["Set an ongoing annual home-maintenance allowance","own"],["List non-urgent landlord repairs to follow up","rent"],["Check whether broadband/energy choices still suit actual usage","all"],["Do a final 90-day household check-in","multi"]
+]}
+];
+
+function isoToday(){return new Date().toISOString().slice(0,10)}
+function v(id){return document.querySelector("#"+id).value}
+function relevant(tag){return tag==="all"||tag==="rent"&&v("tenure")==="rent"||tag==="own"&&v("tenure")==="own"||tag==="children"&&v("children")==="1"||tag==="pets"&&v("pets")==="1"||tag==="wfh"&&v("wfh")==="1"||tag==="garden"&&v("garden")==="1"||tag==="scratch"&&v("scratch")==="1"||tag==="multi"&&(+v("adults")>1)}
 function addDays(s,n){const [y,m,d]=s.split("-").map(Number),dt=new Date(Date.UTC(y,m-1,d));dt.setUTCDate(dt.getUTCDate()+n);return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})}
-function relevant(tag){const v=id=>document.querySelector("#"+id).value;return tag==="all"||tag==="utilities"||tag==="rent"&&v("tenure")==="rent"||tag==="own"&&v("tenure")==="own"||tag==="children"&&v("children")==="1"||tag==="pets"&&v("pets")==="1"||tag==="wfh"&&v("wfh")==="1"||tag==="garden"&&v("garden")==="1"||tag==="scratch"&&v("scratch")==="1"||tag==="multi"&&(+v("adults")>1);}
-function build(){const date=document.querySelector("#date").value||isoToday();const html=phases.map(p=>{const tasks=p.t.filter(x=>relevant(x[1]));return '<section class="phase"><div class="ph"><b>'+p.n+'</b><span>By '+addDays(date,p.d)+'</span></div>'+tasks.map(x=>'<div class="task"><div><b>'+x[0]+'</b><small>'+({all:"For most homes",utilities:"Move-in admin",rent:"Renters",own:"Owners",children:"Families",pets:"Pet households",wfh:"Home workers",garden:"Outdoor space",scratch:"Starting from scratch",multi:"Shared household"}[x[1]])+'</small></div></div>').join("")+'</section>'}).join("");document.querySelector("#plan").innerHTML=html;document.querySelector("#period").textContent="Move-in "+addDays(date,0)+" → day 90 "+addDays(date,90)}
-document.querySelector("#build").addEventListener("click",build);build();
-</script></body></html>
+function dayDiff(s){const [y,m,d]=s.split("-").map(Number);const target=new Date(y,m-1,d),today=new Date();today.setHours(0,0,0,0);return Math.round((target-today)/86400000)}
+function build(save=true){
+ const date=v("date")||isoToday(),days=dayDiff(date);
+ const html=pre.map(p=>{const tasks=p.t.filter(x=>relevant(x[1]));return '<section class="phase"><div class="ph"><b>'+p.n+'</b><span>'+addDays(date,p.offset)+'</span></div>'+tasks.map(x=>'<div class="task"><b>'+x[0]+'</b><small>'+({all:"For most moves",rent:"Renters",own:"Owners",children:"Families",pets:"Pet households",wfh:"Home workers",garden:"Outdoor space",scratch:"Starting from scratch",multi:"Shared household"}[x[1]])+'</small></div>').join("")+'</section>'}).join("");
+ document.querySelector("#plan").innerHTML=html;
+ document.querySelector("#period").textContent="Moving day: "+addDays(date,0);
+ document.querySelector("#countdown").textContent=days>1?days+" days until moving day":days===1?"Moving tomorrow":days===0?"Moving day is today":Math.abs(days)+" days since moving day";
+ const locks=post.map(p=>{const tasks=p.t.filter(x=>relevant(x[1]));const sample=tasks[0]?tasks[0][0]:"Your personalised next steps";return '<div class="lockbox"><b>🔒 '+p.n+'</b><span>'+tasks.length+' personalised actions ready</span><div class="sample">Example: '+sample+'</div></div>'}).join("");
+ document.querySelector("#locked").innerHTML=locks;
+ const total=post.reduce((n,p)=>n+p.t.filter(x=>relevant(x[1])).length,0);
+ document.querySelector("#completeIntro").textContent="Based on this household, "+total+" post-move actions are ready from moving day through day 90. Complete adds the actual plan, progress tracking, purchase tracking, reminders, sharing and “what should I do next?”";
+ if(save){
+   const profile={date,tenure:v("tenure"),adults:v("adults"),children:v("children"),pets:v("pets"),wfh:v("wfh"),garden:v("garden"),scratch:v("scratch"),postActionCount:total};
+   localStorage.setItem("homefirst90-move-profile",JSON.stringify(profile));
+ }
+}
+document.querySelector("#date").value=isoToday();
+try{
+ const saved=JSON.parse(localStorage.getItem("homefirst90-move-profile")||"null");
+ if(saved){
+  ["date","tenure","adults","children","pets","wfh","garden","scratch"].forEach(id=>{if(saved[id]!==undefined)document.querySelector("#"+id).value=saved[id]});
+ }
+}catch(e){}
+document.querySelector("#build").addEventListener("click",()=>build(true));
+build(false);
+</script>
+</body></html>
