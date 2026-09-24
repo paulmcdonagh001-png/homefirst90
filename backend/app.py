@@ -56,7 +56,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialise persistent storage when the service boots.\ninit_db()\n\ndef cors(resp):
+# Initialise persistent storage when the service boots.
+init_db()
+print("HomeFirst90 storage ready:", "postgres" if is_postgres() else "temporary-sqlite", flush=True)
+
+def cors(resp):
     origin = request.headers.get("Origin")
     if origin in ALLOWED_ORIGINS:
         resp.headers["Access-Control-Allow-Origin"] = origin
