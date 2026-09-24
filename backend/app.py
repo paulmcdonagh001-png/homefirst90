@@ -56,7 +56,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-def cors(resp):
+# Initialise persistent storage when the service boots.\ninit_db()\n\ndef cors(resp):
     origin = request.headers.get("Origin")
     if origin in ALLOWED_ORIGINS:
         resp.headers["Access-Control-Allow-Origin"] = origin
