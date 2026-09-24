@@ -103,8 +103,8 @@ async function activateCompleteState(){
    document.querySelector("#completeTitle").textContent="Your HomeFirst90 Complete access is active.";
    document.querySelector("#completeText").textContent="This Home is linked to your paid Complete access. Your planning data can now be stored securely with your HomeFirst90 household.";
    document.querySelector("#completePrice").style.display="none";
-   document.querySelector("#completeCta").textContent="Complete active ✓";
-   document.querySelector("#completeCta").removeAttribute("href");
+   document.querySelector("#completeCta").textContent="Open Complete Home →";
+   document.querySelector("#completeCta").setAttribute("href","/complete-home.html");
    document.querySelector("#completeSmall").textContent=(data.email?"Purchased with "+data.email+" · ":"")+"Cloud Home connection active.";
    const payload={};
    for(const k of ["homefirst90-home","homefirst90-moving","homefirst90-bills","homefirst90-move-profile","homefirst90-90day-checks"]){
