@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Home | HomeFirst90</title>
+<meta name="description" content="See your saved HomeFirst90 setup estimate, moving budget, household bills and first-week plan in one place.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#153f33">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--g:#153f33;--g2:#e8f1ed;--m:#61706a;--p:#f5f5f0;--c:#fff;--l:#dfe5e1;--s:#f1f5f2;--a:#fff5dc;--ink:#17201d}
+*{box-sizing:border-box}body{margin:0;background:var(--p);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:1080px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.brand{font-size:22px;font-weight:950}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{text-decoration:none;color:var(--g);font-weight:800;font-size:13px;padding:8px 10px;border-radius:999px;background:#fff;border:1px solid var(--l)}.hero{background:var(--g);color:#fff;border-radius:28px;padding:30px;margin-top:18px}.ey{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#c7d9d1}.hero h1{font-size:46px;line-height:1.02;letter-spacing:-.045em;margin:8px 0 10px}.hero p{color:#dbe8e2;margin:0;max-width:760px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.card{background:#fff;border:1px solid var(--l);border-radius:18px;padding:18px}.card span{font-size:12px;color:var(--m);display:block}.card b{font-size:25px;letter-spacing:-.03em;display:block;margin-top:3px}.card a{display:inline-block;margin-top:10px;color:var(--g);font-size:13px;font-weight:900;text-decoration:none}.wide{margin-top:14px;background:#fff;border:1px solid var(--l);border-radius:22px;padding:22px}.wide h2{margin:0 0 5px;font-size:28px;letter-spacing:-.03em}.muted{color:var(--m)}.split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.box{background:var(--s);border-radius:16px;padding:16px}.box h3{margin:0 0 6px}.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #dfe5e1;font-size:14px}.row:first-of-type{border-top:0}.premium{background:#101f1a;color:#fff;border:0}.premium p{color:#c9d7d1}.premium-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.perk{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}.perk b{font-size:15px}.price{font-size:42px;font-weight:950;letter-spacing:-.05em;margin:8px 0}.chip{display:inline-block;background:var(--g2);color:var(--g);padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}.empty{background:var(--a);padding:14px;border-radius:13px;margin-top:12px}.cta{display:inline-block;background:#fff;color:var(--g);font-weight:900;text-decoration:none;padding:12px 15px;border-radius:12px;margin-top:12px}.progress{height:9px;background:#dfe5e1;border-radius:999px;overflow:hidden;margin-top:8px}.progress div{height:100%;background:var(--g);width:0}@media(max-width:780px){.grid{grid-template-columns:1fr 1fr}.split,.premium-grid{grid-template-columns:1fr}.hero h1{font-size:36px}}@media(max-width:480px){.grid{grid-template-columns:1fr}.w{padding:12px}}
+</style></head>
+<body><main class="w">
+<header class="top"><div class="brand"><a href="/" style="text-decoration:none;color:inherit">HomeFirst90</a></div><nav class="nav"><a href="/">Home</a><a href="/what-to-buy-first.html">Buy First</a><a href="/first-90-days-planner.html">First 90 Days</a></nav></header>
+<section class="hero"><div class="ey">My Home</div><h1>Your move, in one place.</h1><p id="heroText">Your free tools feed this dashboard on this device. HomeFirst90 Complete will turn this into the full working control centre for the move.</p></section>
+<section class="grid">
+<div class="card"><span>Setup estimate</span><b id="setup">—</b><a href="/#calculator">Update setup</a></div>
+<div class="card"><span>Move-out cash</span><b id="move">—</b><a href="/moving-out-budget-calculator.html">Calculate move</a></div>
+<div class="card"><span>Monthly home cost</span><b id="bills">—</b><a href="/household-bills-estimator.html">Calculate bills</a></div>
+<div class="card"><span>Missing setup items</span><b id="missing">—</b><a href="/what-to-buy-first.html">See top 5</a></div>
+</section>
+<section class="wide"><h2>Your free HomeFirst90 snapshot</h2><p class="muted">The free version answers the key questions. Complete is where the whole move gets managed.</p><div class="split">
+<div class="box"><h3>Budget position</h3><div id="budgetRows"><div class="empty">Calculate your setup to fill this section.</div></div></div>
+<div class="box"><h3>First-week progress</h3><div id="weekText" class="muted">Open the First 90 Days Planner to create your first-week checklist.</div><div class="progress"><div id="weekBar"></div></div><a href="/first-90-days-planner.html" style="color:var(--g);font-weight:900;text-decoration:none;display:inline-block;margin-top:10px">Open first-week plan →</a></div>
+</div></section>
+<section class="wide premium"><div class="chip">HOMEFIRST90 COMPLETE · COMING SOON</div><h2 style="margin-top:10px">This is where the paid package begins.</h2><p>Keep the calculators free. Charge for turning all those answers into one shared, trackable home plan.</p><div class="price">£12.99 <span style="font-size:15px;font-weight:700;letter-spacing:0">one-off</span></div><div class="premium-grid">
+<div class="perk"><b>Full shopping plan</b><span>Every missing item, purchase status and actual spend.</span></div>
+<div class="perk"><b>Full 90-day plan</b><span>Days 8–90, progress tracking and what to do next.</span></div>
+<div class="perk"><b>Cloud My Home</b><span>Keep the home across devices instead of only this browser.</span></div>
+<div class="perk"><b>Share the move</b><span>Partner or housemate access to the same plan.</span></div>
+<div class="perk"><b>Actual vs budget</b><span>See what the move is really costing as purchases happen.</span></div>
+<div class="perk"><b>One control centre</b><span>Setup, bills, moving cash, shopping and tasks together.</span></div>
+</div><div class="cta" aria-disabled="true">Complete checkout coming next</div></section>
+</main>
+<script>
+const GBP=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
+let home=null,move=null,bills=null,checks={};
+try{home=JSON.parse(localStorage.getItem("homefirst90-home")||"null")}catch(e){}
+try{move=JSON.parse(localStorage.getItem("homefirst90-moving")||"null")}catch(e){}
+try{bills=JSON.parse(localStorage.getItem("homefirst90-bills")||"null")}catch(e){}
+try{checks=JSON.parse(localStorage.getItem("homefirst90-90day-checks")||"{}")}catch(e){}
+if(home&&Array.isArray(home.rows)){
+ const total=home.rows.reduce((s,r)=>s+(r.cost||0),0);
+ const missing=home.rows.filter(r=>!r.owned&&r.cost>0).length;
+ document.querySelector("#setup").textContent=GBP(total);
+ document.querySelector("#missing").textContent=missing;
+ const p=home.profile||{},usable=Math.max(0,(p.budget||0)-(p.buffer||0)),gap=usable-total;
+ document.querySelector("#budgetRows").innerHTML=
+ '<div class="row"><span>Setup budget after buffer</span><b>'+GBP(usable)+'</b></div>'+
+ '<div class="row"><span>Estimated setup</span><b>'+GBP(total)+'</b></div>'+
+ '<div class="row"><span>'+(gap>=0?'Money left':'Budget gap')+'</span><b>'+GBP(Math.abs(gap))+'</b></div>';
+}else document.querySelector("#heroText").textContent="Start with the free Setup Cost Calculator. Once calculated, your home snapshot will appear here automatically.";
+if(move&&typeof move.total==="number")document.querySelector("#move").textContent=GBP(move.total);
+if(bills&&typeof bills.total==="number")document.querySelector("#bills").textContent=GBP(bills.total);
+const keys=Object.keys(checks),done=keys.filter(k=>checks[k]).length;
+if(keys.length){document.querySelector("#weekText").textContent=done+" of "+keys.length+" free first-week tasks complete";document.querySelector("#weekBar").style.width=(done/keys.length*100)+"%";}
+</script></body></html>
