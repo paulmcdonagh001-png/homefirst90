@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My Home | HomeFirst90</title>
-<meta name="description" content="See your saved HomeFirst90 setup estimate, moving budget, household bills and first-week plan in one place.">
+<meta name="description" content="See your saved HomeFirst90 setup estimate, moving budget and household bills in one place, and discover what HomeFirst90 Complete adds.">
 <meta name="robots" content="noindex,follow">
 <meta name="theme-color" content="#153f33">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -23,24 +23,23 @@
 </section>
 <section class="wide"><h2>Your free HomeFirst90 snapshot</h2><p class="muted">The free version answers the key questions. Complete is where the whole move gets managed.</p><div class="split">
 <div class="box"><h3>Budget position</h3><div id="budgetRows"><div class="empty">Calculate your setup to fill this section.</div></div></div>
-<div class="box"><h3>First-week progress</h3><div id="weekText" class="muted">Open the First 90 Days Planner to create your first-week checklist.</div><div class="progress"><div id="weekBar"></div></div><a href="/first-90-days-planner.html" style="color:var(--g);font-weight:900;text-decoration:none;display:inline-block;margin-top:10px">Open first-week plan →</a></div>
+<div class="box"><h3>Your 90-day guide</h3><div class="muted">The full personalised 90-day guide is free to view. HomeFirst90 Complete is for saved progress, reminders and a live “what should I do next?” view.</div><a href="/first-90-days-planner.html" style="color:var(--g);font-weight:900;text-decoration:none;display:inline-block;margin-top:10px">Open the free 90-day guide →</a></div>
 </div></section>
 <section class="wide premium"><div class="chip">HOMEFIRST90 COMPLETE · COMING SOON</div><h2 style="margin-top:10px">This is where the paid package begins.</h2><p>Keep the calculators free. Charge for turning all those answers into one shared, trackable home plan.</p><div class="price">£12.99 <span style="font-size:15px;font-weight:700;letter-spacing:0">one-off</span></div><div class="premium-grid">
 <div class="perk"><b>Full shopping plan</b><span>Every missing item, purchase status and actual spend.</span></div>
-<div class="perk"><b>Full 90-day plan</b><span>Days 8–90, progress tracking and what to do next.</span></div>
+<div class="perk"><b>Smart progress tracking</b><span>Tick jobs off, keep progress saved and always know what needs attention next.</span></div>
 <div class="perk"><b>Cloud My Home</b><span>Keep the home across devices instead of only this browser.</span></div>
 <div class="perk"><b>Share the move</b><span>Partner or housemate access to the same plan.</span></div>
 <div class="perk"><b>Actual vs budget</b><span>See what the move is really costing as purchases happen.</span></div>
-<div class="perk"><b>One control centre</b><span>Setup, bills, moving cash, shopping and tasks together.</span></div>
+<div class="perk"><b>Reminders & what’s next</b><span>Surface the next useful actions instead of making you reopen long checklists.</span></div>
 </div><div class="cta" aria-disabled="true">Complete checkout coming next</div></section>
 </main>
 <script>
 const GBP=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
-let home=null,move=null,bills=null,checks={};
+let home=null,move=null,bills=null;
 try{home=JSON.parse(localStorage.getItem("homefirst90-home")||"null")}catch(e){}
 try{move=JSON.parse(localStorage.getItem("homefirst90-moving")||"null")}catch(e){}
 try{bills=JSON.parse(localStorage.getItem("homefirst90-bills")||"null")}catch(e){}
-try{checks=JSON.parse(localStorage.getItem("homefirst90-90day-checks")||"{}")}catch(e){}
 if(home&&Array.isArray(home.rows)){
  const total=home.rows.reduce((s,r)=>s+(r.cost||0),0);
  const missing=home.rows.filter(r=>!r.owned&&r.cost>0).length;
@@ -54,6 +53,4 @@ if(home&&Array.isArray(home.rows)){
 }else document.querySelector("#heroText").textContent="Start with the free Setup Cost Calculator. Once calculated, your home snapshot will appear here automatically.";
 if(move&&typeof move.total==="number")document.querySelector("#move").textContent=GBP(move.total);
 if(bills&&typeof bills.total==="number")document.querySelector("#bills").textContent=GBP(bills.total);
-const keys=Object.keys(checks).filter(k=>k.startsWith("0-")||k.startsWith("1-")),done=keys.filter(k=>checks[k]).length;
-if(keys.length){document.querySelector("#weekText").textContent=done+" of "+keys.length+" free first-week tasks complete";document.querySelector("#weekBar").style.width=(done/keys.length*100)+"%";}
 </script></body></html>
