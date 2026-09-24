@@ -24,7 +24,7 @@
 </head>
 <body>
 <main class="wrap">
-<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan your move-in. Set up your home. Sort your first 90 days.</div></div><nav class="nav"><a href="#tools">Free tools</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Buy first</a><a href="/first-90-days-planner.html">90 days</a><button id="install" class="hidden">Install app</button></nav></header>
+<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan your move-in. Set up your home. Sort your first 90 days.</div><div id="homeStatus" class="pill" style="margin-top:7px">My Home: Not saved</div></div><nav class="nav"><a href="#tools">Free tools</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Buy first</a><a href="/first-90-days-planner.html">90 days</a><button id="install" class="hidden">Install app</button></nav></header>
 
 <section class="hero">
 <div class="hero-main">
@@ -92,7 +92,7 @@
 <div class="result-head"><div><div class="tag">Estimated setup cost</div><div class="big" id="grand">£0</div></div><div class="pill" id="budgetPill"></div></div>
 <div class="stats"><div class="stat"><span>Need now</span><b id="now">£0</b></div><div class="stat"><span>First 30 days</span><b id="month">£0</b></div><div class="stat"><span>Can wait</span><b id="later">£0</b></div></div>
 <div class="bar"><div id="coverBar"></div></div><p class="tag" id="coverText" style="margin-top:6px"></p><div id="warning" class="warning hidden"></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" style="background:var(--green);color:#fff" id="save" type="button">Save this home</button><a class="btn" style="background:var(--green2);color:var(--green)" href="/what-to-buy-first.html">What should I buy first?</a><a class="btn" style="background:#fff;border:1px solid var(--line);color:var(--green)" href="/first-90-days-planner.html">Plan my first 90 days</a></div>
+<div id="savedNotice" style="background:#e8f1ed;color:var(--green);border:1px solid #cbded5;border-radius:13px;padding:12px 14px;margin-top:12px;font-weight:850">Home saved on this device ✓</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn" style="background:var(--green);color:#fff" href="/what-to-buy-first.html">What should I buy first?</a><a class="btn" style="background:#fff;border:1px solid var(--line);color:var(--green)" href="/first-90-days-planner.html">Plan my first 90 days</a></div>
 <div class="rooms" id="rooms"></div>
 </div>
 </div>
@@ -159,10 +159,10 @@ function render(){
  const groups={};rows.forEach(r=>(groups[r.room]??=[]).push(r));
  q("#rooms").innerHTML=Object.entries(groups).map(([room,rs])=>'<div class="room"><div class="room-head"><span>'+room+'</span><span>'+GBP.format(rs.reduce((s,r)=>s+r.cost,0))+'</span></div>'+rs.map(r=>'<div class="item"><div><b>'+r.name+(r.qty>1?" × "+r.qty:"")+'</b><small>'+({now:"Need now",month:"First 30 days",later:"Can wait"}[r.stage])+(r.owned?" · already covered":"")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>').join("")+'</div>').join("");
 }
-q("#form").addEventListener("submit",e=>{e.preventDefault();build();q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
-q("#save").addEventListener("click",()=>{if(!profile)return;localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows}));q("#save").textContent="Saved ✓"});
+q("#form").addEventListener("submit",e=>{e.preventDefault();build();localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows}));q("#homeStatus").textContent="My Home: Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
+
 const params=new URLSearchParams(location.search);if(params.get("bedrooms"))q("#bedrooms").value=params.get("bedrooms");if(params.get("property"))q("#property").value=params.get("property");
-try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render()}}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];q("#homeStatus").textContent="My Home: Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render()}}catch(e){}
 let deferred;const ib=q("#install");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.classList.remove("hidden")});ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;ib.classList.add("hidden")});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
