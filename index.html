@@ -50,7 +50,7 @@
 <div class="panel">
 <div class="eyebrow" style="color:var(--green)">Flagship search tool · free</div>
 <h2>New Home Setup Cost</h2>
-<p class="muted">Tell us what you're moving into and we'll build a planning estimate. Prices are broad UK estimates for validation, not live retailer quotes.</p>
+<p class="muted">Tell us what you're moving into and we'll build a planning estimate. Prices are broad UK planning estimates, calibrated against current mainstream UK retailer ranges rather than live quotes. <a href="/methodology.html" style="color:var(--green);font-weight:800">How the estimate works</a>.</p>
 <form id="form">
 <div class="section"><h3>1. Your new home</h3><div class="fields">
 <div class="field"><label>Property</label><select id="property"><option value="flat">Flat</option><option value="house" selected>House</option></select></div>
@@ -108,18 +108,18 @@
 <a href="/new-home-setup-budget.html"><b>New-home setup budget</b><span>Essentials, first month and later.</span></a>
 </div></section>
 
-<footer><div><b>HomeFirst90</b> · working brand for validation</div><div>Planning estimates only · live retail pricing not connected yet</div></footer>
+<footer><div><b>HomeFirst90</b> · working brand for validation</div><div><a href="/methodology.html" style="color:inherit">Methodology</a> · <a href="/privacy.html" style="color:inherit">Privacy</a> · Planning estimates only</div></footer>
 </main>
 
 <script>
 const GBP=new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0});
 const base=[
-["Kitchen","Fridge freezer",430,"now",98],["Kitchen","Washing machine",360,"now",96],["Kitchen","Cookware",180,"now",94],["Kitchen","Kettle & toaster",65,"now",88],["Kitchen","Microwave",100,"month",65],["Kitchen","Bin & cleaning basics",65,"now",91],
-["Living room","Sofa",650,"month",78],["Living room","TV",420,"later",35],["Living room","TV/storage unit",120,"later",28],["Living room","Lighting",70,"month",72],["Living room","Curtains/blinds",150,"month",74],
-["Bedroom","Bed frame",260,"now",96],["Bedroom","Mattress",430,"now",99],["Bedroom","Wardrobe/storage",220,"month",76],["Bedroom","Bedding",95,"now",94],["Bedroom","Curtains/blinds",100,"month",73],
-["Dining","Dining table",320,"later",42],["Bathroom","Towels & bathroom basics",85,"now",89],["Bathroom","Storage",55,"month",54],
-["Whole home","Vacuum",160,"now",90],["Whole home","Basic tool kit",70,"month",67],["Whole home","Lamps & bulbs",75,"month",70],["Whole home","Extension leads",35,"now",82],["Whole home","Doormat & small storage",55,"later",30],
-["Office","Desk",170,"month",72],["Office","Chair",180,"month",78],["Children","Child bedroom basics",350,"now",92]
+["Kitchen","Fridge freezer",330,"now",98],["Kitchen","Washing machine",325,"now",96],["Kitchen","Cookware",150,"now",94],["Kitchen","Kettle & toaster",55,"now",88],["Kitchen","Microwave",90,"month",65],["Kitchen","Bin & cleaning basics",55,"now",91],
+["Living room","Sofa",450,"month",78],["Living room","TV",350,"later",35],["Living room","TV/storage unit",100,"later",28],["Living room","Lighting",60,"month",72],["Living room","Curtains/blinds",120,"month",74],
+["Bedroom","Bed frame",180,"now",96],["Bedroom","Mattress",230,"now",99],["Bedroom","Wardrobe/storage",180,"month",76],["Bedroom","Bedding",80,"now",94],["Bedroom","Curtains/blinds",100,"month",73],
+["Dining","Dining table",300,"later",42],["Bathroom","Towels & bathroom basics",70,"now",89],["Bathroom","Storage",45,"month",54],
+["Whole home","Vacuum",130,"now",90],["Whole home","Basic tool kit",60,"month",67],["Whole home","Lamps & bulbs",60,"month",70],["Whole home","Extension leads",30,"now",82],["Whole home","Doormat & small storage",50,"later",30],
+["Office","Desk",130,"month",72],["Office","Chair",150,"month",78],["Children","Child bedroom basics",300,"now",92]
 ];
 let rows=[],profile=null,unlocked=false;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
