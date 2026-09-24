@@ -1,0 +1,17 @@
+{
+  "name": "HomeFirst90",
+  "short_name": "HomeFirst90",
+  "description": "Plan the cost, essentials and first 90 days of setting up a new home.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f2",
+  "theme_color": "#153f33",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
