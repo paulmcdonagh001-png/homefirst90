@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HomeFirst90 Complete | My Home</title>
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#153f33">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--g:#153f33;--g2:#e8f1ed;--m:#61706a;--p:#f5f5f0;--l:#dfe5e1;--s:#f1f5f2;--a:#fff5dc;--ink:#17201d}
+*{box-sizing:border-box}body{margin:0;background:var(--p);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:1080px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-weight:950;font-size:22px}.brand a{text-decoration:none;color:inherit}.tag{font-size:12px;color:var(--m);font-weight:800}.nav a{color:var(--g);text-decoration:none;font-weight:850;margin-left:12px}.hero{margin-top:18px;background:#101f1a;color:#fff;border-radius:26px;padding:28px}.ey{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:900;color:#c8d8d1}.hero h1{font-size:44px;line-height:1.03;letter-spacing:-.045em;margin:8px 0}.hero p{color:#cad8d2;max-width:760px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.card,.panel{background:#fff;border:1px solid var(--l);border-radius:18px;padding:18px}.card span{display:block;color:var(--m);font-size:12px}.card b{display:block;font-size:25px;margin-top:3px}.panel{margin-top:14px}.panel h2{margin:0 0 5px;font-size:28px;letter-spacing:-.03em}.muted{color:var(--m)}.next{display:grid;gap:8px;margin-top:12px}.next .item{background:var(--s);border-radius:13px;padding:13px}.next small{display:block;color:var(--m);margin-bottom:3px}.phases{display:grid;gap:10px;margin-top:12px}.phase{border:1px solid var(--l);border-radius:14px;overflow:hidden}.ph{background:var(--s);padding:11px 13px;font-weight:900}.task{display:flex;gap:9px;padding:10px 12px;border-top:1px solid var(--l)}.task input{margin-top:4px}.shop{display:grid;gap:8px;margin-top:12px}.shoprow{display:grid;grid-template-columns:1fr 110px 80px;gap:8px;align-items:center;border:1px solid var(--l);border-radius:12px;padding:10px}.shoprow input[type=number]{width:100%;padding:8px;border:1px solid #ccd6d0;border-radius:9px}.shoprow small{color:var(--m);display:block}.access{background:var(--g2);border-radius:14px;padding:14px;margin-top:14px}.code{font-family:ui-monospace,monospace;word-break:break-all;background:#fff;padding:10px;border-radius:9px;margin-top:8px}.login{max-width:600px;margin:80px auto;background:#fff;border:1px solid var(--l);border-radius:22px;padding:26px}.login input{width:100%;padding:12px;border:1px solid #ccd6d0;border-radius:11px}.btn{border:0;background:var(--g);color:#fff;border-radius:11px;padding:12px 14px;font-weight:900;cursor:pointer;margin-top:10px}.hidden{display:none!important}@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}.shoprow{grid-template-columns:1fr}.hero h1{font-size:36px}}@media(max-width:480px){.grid{grid-template-columns:1fr}.w{padding:12px}}
+</style></head>
+<body><main class="w">
+<header class="top"><div><div class="brand"><a href="/">HomeFirst90</a></div><div class="tag">Complete · Plan the move. Own your first 90 days.</div></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="/">Home</a></nav></header>
+
+<section id="login" class="login hidden">
+<h2>Open your Complete Home</h2><p class="muted">Enter the household access code from the device that purchased HomeFirst90 Complete.</p>
+<input id="codeInput" placeholder="hf90_..."><button class="btn" id="codeBtn">Open Complete</button><div id="codeMsg" class="muted" style="margin-top:8px"></div>
+</section>
+
+<div id="app" class="hidden">
+<section class="hero"><div class="ey">HOMEFIRST90 COMPLETE · ACTIVE</div><h1 id="heroTitle">What should I do next?</h1><p id="heroText">Your live move-in control centre.</p></section>
+<section class="grid">
+<div class="card"><span>Day</span><b id="day">—</b></div>
+<div class="card"><span>Tasks completed</span><b id="taskProgress">—</b></div>
+<div class="card"><span>Purchases outstanding</span><b id="purchaseCount">—</b></div>
+<div class="card"><span>Actual setup spend</span><b id="actualSpend">—</b></div>
+</section>
+
+<section class="panel"><h2>What should I do next?</h2><p class="muted">The next useful actions for where you are now.</p><div id="next" class="next"></div></section>
+<section class="panel"><h2>Moving day → Day 90</h2><p class="muted">Tick jobs off as they are completed. Progress is saved to your Complete Home.</p><div id="phases" class="phases"></div></section>
+<section class="panel"><h2>Purchase tracking</h2><p class="muted">Mark items bought and replace the estimate with what you actually paid.</p><div id="shop" class="shop"></div></section>
+<section class="panel"><h2>Share or use another device</h2><p class="muted">This household code opens the same Complete Home on another browser or for a partner/housemate. Treat it like a password.</p><div id="accessCode" class="code"></div></section>
+</div>
+</main>
+<script>
+const API="https://homefirst90-api.onrender.com";
+const GBP=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
+const post=[
+["Moving day + first 48 hours",2,[["meters","Take meter readings and photograph them","all"],["controls","Find the stopcock, fuse box / consumer unit and main controls","all"],["alarms","Check smoke and carbon-monoxide alarms","all"],["secure","Secure doors/windows and identify every key","all"],["essentials","Get sleeping, bathroom and basic kitchen essentials usable","scratch"],["inventory","Photograph condition and inventory issues","rent"],["petid","Update pet ID / microchip contact details","pets"]]],
+["Week 1",7,[["counciltax","Register / confirm council tax responsibility","all"],["utilities","Set up or confirm energy and water accounts","all"],["broadband","Get broadband working and test real speeds","all"],["gp","Register with a local GP if needed","all"],["wfh","Test home-working setup in real conditions","wfh"],["billsplit","Agree who pays which recurring bills","multi"],["repairs","Report tenancy repairs or inventory discrepancies in writing","rent"]]],
+["Days 8–30",30,[["realbills","Replace estimated bills with the first real household bills","all"],["nextbuy","Buy the next priority items without blowing the setup budget","scratch"],["bins","Check bins, recycling days and local collection rules","all"],["routine","Build a simple cleaning and maintenance routine","all"],["garden","Check garden boundaries, drainage and immediate maintenance","garden"],["subs","Review subscriptions and direct debits after the move","all"]]],
+["Days 31–60",60,[["rooms","Review rooms that still do not work properly before buying decoration","all"],["storage","Finish storage only where clutter is actually causing a problem","all"],["fund","Create a small home emergency / repair fund","all"],["serials","Record appliance model/serial details and keep key receipts","all"],["costs","Review commute, school and home-working costs","all"]]],
+["Days 61–90",90,[["budgetreview","Compare total setup spend with the original budget","all"],["declutter","Sell, donate or recycle duplicate items and moving clutter","all"],["maintenance","Set an ongoing annual home-maintenance allowance","own"],["landlord","List non-urgent landlord repairs to follow up","rent"],["energyreview","Check whether broadband/energy choices still suit actual usage","all"],["checkin","Do a final 90-day household check-in","multi"]]]
+];
+let key=localStorage.getItem("homefirst90-complete-access")||"", cloud={}, tasks={}, purchases={};
+
+function relevant(tag,p){return tag==="all"||tag==="rent"&&p.tenure==="rent"||tag==="own"&&p.tenure==="own"||tag==="pets"&&p.pets==="1"||tag==="wfh"&&p.wfh==="1"||tag==="garden"&&p.garden==="1"||tag==="scratch"&&p.scratch==="1"||tag==="multi"&&(+p.adults>1)}
+async function request(path,opt={}){opt.headers={...(opt.headers||{}),"Authorization":"Bearer "+key};return fetch(API+path,opt)}
+async function verify(){
+ if(!key){showLogin();return false}
+ try{const r=await request("/api/access/verify",{method:"POST"});if(!r.ok)throw 0;return true}catch(e){localStorage.removeItem("homefirst90-complete-access");key="";showLogin();return false}
+}
+function showLogin(){document.querySelector("#login").classList.remove("hidden");document.querySelector("#app").classList.add("hidden")}
+async function load(){
+ if(!(await verify()))return;
+ document.querySelector("#login").classList.add("hidden");document.querySelector("#app").classList.remove("hidden");
+ const r=await request("/api/home");const d=await r.json();cloud=d.home||{};tasks=cloud.completeTasks||{};purchases=cloud.purchaseTracking||{};render();
+}
+async function save(extra){
+ cloud={...cloud,...extra};
+ await request("/api/home",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(extra)});
+}
+function dayNumber(date){if(!date)return null;const [y,m,d]=date.split("-").map(Number),t=new Date(y,m-1,d),n=new Date();n.setHours(0,0,0,0);return Math.floor((n-t)/86400000)}
+function render(){
+ const mp=cloud["homefirst90-move-profile"]||{},h=cloud["homefirst90-home"]||{},rows=Array.isArray(h.rows)?h.rows:[],day=dayNumber(mp.date);
+ document.querySelector("#day").textContent=day===null?"—":day<0?Math.abs(day)+" to go":day;
+ document.querySelector("#heroText").textContent=day===null?"Add a move-in date in the pre-move planner to make this dashboard date-aware.":day<0?"You are still "+Math.abs(day)+" days from moving day. Your post-move plan is ready.":day<=90?"Day "+day+" of your first 90 days.":"Your first 90 days are complete — use this Home as your record.";
+ let all=[];
+ post.forEach(([name,end,list])=>list.filter(x=>relevant(x[2],mp)).forEach(x=>all.push({phase:name,end,id:x[0],text:x[1]})));
+ const done=all.filter(x=>tasks[x.id]).length;
+ document.querySelector("#taskProgress").textContent=done+" / "+all.length;
+ const missing=rows.filter(r=>!r.owned&&r.cost>0);
+ const outstanding=missing.filter(r=>!(purchases[r.id]||{}).bought).length;
+ const actual=missing.reduce((s,r)=>s+(+(purchases[r.id]||{}).actual||0),0);
+ document.querySelector("#purchaseCount").textContent=outstanding;
+ document.querySelector("#actualSpend").textContent=GBP(actual);
+ let candidates=all.filter(x=>!tasks[x.id]);
+ if(day!==null&&day>=0)candidates.sort((a,b)=>Math.abs(a.end-day)-Math.abs(b.end-day));
+ document.querySelector("#next").innerHTML=(candidates.slice(0,4).map(x=>'<div class="item"><small>'+x.phase+'</small><b>'+x.text+'</b></div>').join("")||'<div class="item"><b>You’re up to date.</b></div>');
+ document.querySelector("#phases").innerHTML=post.map(([name,end,list])=>{const rs=list.filter(x=>relevant(x[2],mp));if(!rs.length)return"";return '<div class="phase"><div class="ph">'+name+'</div>'+rs.map(x=>'<label class="task"><input type="checkbox" data-task="'+x[0]+'" '+(tasks[x[0]]?'checked':'')+'><span>'+x[1]+'</span></label>').join("")+'</div>'}).join("");
+ document.querySelectorAll("[data-task]").forEach(el=>el.addEventListener("change",async e=>{tasks[e.target.dataset.task]=e.target.checked;await save({completeTasks:tasks});render()}));
+ document.querySelector("#shop").innerHTML=missing.map(r=>{const p=purchases[r.id]||{};return '<div class="shoprow"><div><b>'+r.name+(r.qty>1?' × '+r.qty:'')+'</b><small>Planned '+GBP(r.cost)+'</small></div><input type="number" min="0" step="1" data-actual="'+r.id+'" value="'+(p.actual||"")+'" placeholder="Actual £"><label><input type="checkbox" data-bought="'+r.id+'" '+(p.bought?'checked':'')+'> Bought</label></div>'}).join("")||'<div class="muted">No missing setup items found.</div>';
+ document.querySelectorAll("[data-actual]").forEach(el=>el.addEventListener("change",async e=>{const id=e.target.dataset.actual;purchases[id]={...(purchases[id]||{}),actual:+e.target.value||0};await save({purchaseTracking:purchases});render()}));
+ document.querySelectorAll("[data-bought]").forEach(el=>el.addEventListener("change",async e=>{const id=e.target.dataset.bought;purchases[id]={...(purchases[id]||{}),bought:e.target.checked};await save({purchaseTracking:purchases});render()}));
+ document.querySelector("#accessCode").textContent=key;
+}
+document.querySelector("#codeBtn").addEventListener("click",async()=>{const k=document.querySelector("#codeInput").value.trim();if(!k)return;key=k;localStorage.setItem("homefirst90-complete-access",k);if(await verify())load();else document.querySelector("#codeMsg").textContent="That code could not be verified."});
+load();
+</script></body></html>
