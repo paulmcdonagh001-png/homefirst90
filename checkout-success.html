@@ -16,9 +16,22 @@
 <section class="card">
 <div class="tick">✓</div>
 <div class="ey">Payment successful</div>
-<h1>You’re back at HomeFirst90.</h1>
-<p>Your Stripe checkout completed successfully.</p>
-<div class="note"><b>We’re testing the Complete checkout at the moment.</b><br>This page confirms that the payment flow returns to HomeFirst90 correctly. Complete access is not being activated automatically during sandbox testing.</div>
+<h1>Thanks — your payment has returned to HomeFirst90.</h1>
+<p id="statusText">We’re confirming your HomeFirst90 Complete purchase securely.</p>
+<div class="note"><b id="statusHead">Checking payment…</b><br><span id="statusBody">Please keep this page open for a moment. Your purchase will only unlock after HomeFirst90 confirms the Stripe payment.</span></div>
 <a class="btn" href="/my-home.html">Return to My Home →</a>
 </section>
-</main></body></html>
+</main>
+<script>
+const p=new URLSearchParams(location.search);
+const session=p.get("session_id");
+if(!session){
+ document.querySelector("#statusHead").textContent="Payment reference missing";
+ document.querySelector("#statusBody").textContent="This page cannot unlock Complete without a valid Stripe checkout reference.";
+ document.querySelector("#statusText").textContent="No purchase has been confirmed on this page.";
+}else{
+ document.querySelector("#statusHead").textContent="Stripe reference received";
+ document.querySelector("#statusBody").textContent="The secure payment verification service is being connected before public sales are enabled.";
+}
+</script>
+</body></html>
