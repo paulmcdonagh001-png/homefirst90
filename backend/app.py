@@ -247,6 +247,31 @@ def home():
     conn.close()
     return jsonify({"saved": True})
 
+def startup_self_test():
+    if not WEBHOOK_SECRET:
+        raise RuntimeError("STRIPE_WEBHOOK_SECRET is missing")
+    payload = json.dumps({"type":"checkout.session.completed","data":{"object":{"id":"cs_hf90_startup_test","payment_status":"paid","customer":"cus_hf90_test","customer_details":{"email":"startup-test@homefirst90.invalid"}}}}, separators=(",",":")).encode()
+    ts = int(time.time())
+    sig = hmac.new(WEBHOOK_SECRET.encode(), f"{ts}.".encode() + payload, hashlib.sha256).hexdigest()
+    if not verify_stripe_signature(payload, f"t={ts},v1={sig}"):
+        raise RuntimeError("Stripe signature self-test failed")
+    event = json.loads(payload.decode("utf-8"))
+    save_entitlement(event["data"]["object"])
+    row = row_for_session("cs_hf90_startup_test")
+    if not row or not val(row, "access_key", 3):
+        raise RuntimeError("Entitlement storage self-test failed")
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("DELETE FROM hf90_entitlements WHERE session_id=%s", ("cs_hf90_startup_test",))
+    else:
+        cur.execute("DELETE FROM hf90_entitlements WHERE session_id=?", ("cs_hf90_startup_test",))
+    conn.commit()
+    conn.close()
+    print("HomeFirst90 secure entitlement self-test: passed", flush=True)
+
+startup_self_test()
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "10000")))
