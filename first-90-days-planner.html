@@ -43,12 +43,12 @@
 <div id="plan"></div>
 
 <section class="complete" id="complete">
-<div class="chip">HOMEFIRST90 COMPLETE · COMING SOON</div>
+<div class="chip">HOMEFIRST90 COMPLETE</div>
 <h2>Your move is planned. Now get ready for what happens after you get the keys.</h2>
 <p id="completeIntro">We’ll build the post-move plan from the same home and household details you’ve already entered.</p>
 <div class="price">£12.99 <span style="font-size:15px;font-weight:700;letter-spacing:0">one-off · no subscription</span></div>
 <div class="locked" id="locked"></div>
-<a href="/complete.html">See what HomeFirst90 Complete manages →</a>
+<a href="https://buy.stripe.com/9B69ASeKB1kF2dog4sgrS00">Unlock Complete — £12.99 →</a><div style="font-size:12px;color:#cbd8d2;margin-top:8px">Secure Stripe checkout · one-off payment · no subscription.</div>
 </section>
 </div>
 </section>
@@ -118,7 +118,7 @@ function build(save=true){
  const locks=post.map(p=>{const tasks=p.t.filter(x=>relevant(x[1]));const sample=tasks[0]?tasks[0][0]:"Your personalised next steps";return '<div class="lockbox"><b>🔒 '+p.n+'</b><span>'+tasks.length+' personalised actions ready</span><div class="sample">Example: '+sample+'</div></div>'}).join("");
  document.querySelector("#locked").innerHTML=locks;
  const total=post.reduce((n,p)=>n+p.t.filter(x=>relevant(x[1])).length,0);
- document.querySelector("#completeIntro").textContent="Based on this household, "+total+" post-move actions are ready from moving day through day 90. Complete adds the actual plan, progress tracking, purchase tracking, reminders, sharing and “what should I do next?”";
+ document.querySelector("#completeIntro").textContent="Based on this household, "+total+" post-move actions are ready from moving day through day 90. Complete adds the actual plan, progress tracking, purchase tracking, sharing and “what should I do next?”";
  if(save){
    const profile={date,tenure:v("tenure"),adults:v("adults"),children:v("children"),pets:v("pets"),wfh:v("wfh"),garden:v("garden"),scratch:v("scratch"),postActionCount:total};
    localStorage.setItem("homefirst90-move-profile",JSON.stringify(profile));
