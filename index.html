@@ -4,38 +4,69 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HomeFirst90 — New Home Setup Cost Calculator</title>
-<meta name="description" content="Estimate the cost of setting up your new home, see what to buy first, and plan your first 90 days.">
+<meta name="description" content="Plan the cost of moving and setting up your new home for free, then use HomeFirst90 Complete to manage moving day through your first 90 days.">
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#153f33">
-<meta property="og:title" content="HomeFirst90 — Set up your new home without blowing the budget">
-<meta property="og:description" content="Free personalised new-home setup calculator, checklist and budget planner.">
+<meta property="og:title" content="HomeFirst90 — Plan the move. Own your first 90 days.">
+<meta property="og:description" content="Plan the money and preparation before you move. HomeFirst90 Complete is designed to manage moving day through day 90.">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <style>
 :root{--ink:#17201d;--muted:#61706a;--green:#153f33;--green2:#e8f1ed;--paper:#f5f5f0;--card:#fff;--line:#dfe5e1;--soft:#f1f5f2;--amber:#fff5dc;--red:#fff0ee}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:20px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:6px 0 16px}.brand{font-size:22px;font-weight:900;letter-spacing:-.03em}.tag{font-size:12px;color:var(--muted);font-weight:700}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.nav button{border:0;background:transparent;text-decoration:none;color:var(--muted);font:700 13px inherit;padding:8px 10px;border-radius:999px;cursor:pointer}
 .hero{display:grid;grid-template-columns:1.35fr .65fr;gap:14px}.hero-main{background:var(--green);color:#fff;border-radius:28px;padding:34px;position:relative;overflow:hidden}.hero-main:after{content:"";position:absolute;width:310px;height:310px;border-radius:50%;background:rgba(255,255,255,.055);right:-120px;top:-120px}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;opacity:.78}.hero h1{font-size:52px;line-height:1.01;letter-spacing:-.055em;margin:12px 0 16px;max-width:790px}.hero p{font-size:17px;line-height:1.55;color:rgba(255,255,255,.84);max-width:750px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:0;border-radius:14px;padding:14px 18px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn-light{background:#fff;color:var(--green)}.btn-ghost{border:1px solid rgba(255,255,255,.38);color:#fff;background:transparent}.side{display:grid;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px}.card h2,.card h3{margin:0 0 8px}.card p{color:var(--muted);margin:0}.price-card{background:#101f1a;color:#fff;border:0}.price-card p{color:rgba(255,255,255,.72)}.price{font-size:42px;font-weight:950;letter-spacing:-.05em;margin:5px 0}
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 26px}.feature{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.feature b{display:block;margin-bottom:4px}.feature span{font-size:12px;color:var(--muted)}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 26px}.journey{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 28px}.journey-card{border-radius:22px;padding:22px;border:1px solid var(--line)}.journey-free{background:#fff}.journey-paid{background:#101f1a;color:#fff;border:0}.journey-paid p,.journey-paid li{color:rgba(255,255,255,.74)}.journey-card h2{font-size:30px;letter-spacing:-.035em;margin:7px 0 10px}.journey-card ul{margin:12px 0 0;padding-left:19px}.journey-card li{margin:6px 0}.journey-price{font-size:34px;font-weight:950;letter-spacing:-.04em;margin-top:12px}.journey-card .btn{margin-top:14px}.feature{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.feature b{display:block;margin-bottom:4px}.feature span{font-size:12px;color:var(--muted)}
 .tool{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px}.panel h2{font-size:30px;letter-spacing:-.035em;margin:0 0 8px}.muted{color:var(--muted)}.section{background:var(--soft);border-radius:16px;padding:14px;margin-top:12px}.section h3{font-size:15px;margin:0 0 10px}.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin:0 0 5px}.field select,.field input{width:100%;border:1px solid #ccd6d0;background:#fff;color:var(--ink);border-radius:11px;padding:12px;font:inherit;min-height:44px}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;font-size:13px}.primary{width:100%;margin-top:12px;background:var(--green);color:#fff;border:0;border-radius:13px;padding:15px;font-weight:900;font-size:15px;cursor:pointer}.result-empty{padding:40px 8px;text-align:center;color:var(--muted)}.hidden{display:none!important}.result-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.big{font-size:44px;font-weight:950;letter-spacing:-.05em}.pill{display:inline-flex;border-radius:999px;padding:7px 10px;background:var(--green2);color:var(--green);font-size:12px;font-weight:850}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}.stat{background:var(--soft);border-radius:13px;padding:12px}.stat span{font-size:11px;color:var(--muted);display:block}.stat b{font-size:17px}.bar{height:10px;background:#e5eae7;border-radius:999px;overflow:hidden}.bar>div{height:100%;background:var(--green);width:0}.warning{background:var(--amber);border-radius:12px;padding:11px;font-size:13px;margin:10px 0}.rooms{display:grid;gap:9px;margin-top:12px}.room{border:1px solid var(--line);border-radius:14px;overflow:hidden}.room-head{display:flex;justify-content:space-between;padding:11px 12px;background:#fafbf9;font-weight:850}.item{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 12px;border-top:1px solid var(--line);font-size:13px}.item small{display:block;color:var(--muted)}.premium{margin-top:20px}.premium-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.premium-card{border:1px solid var(--line);border-radius:18px;padding:17px;background:#fff}.premium-card.locked{background:linear-gradient(180deg,#fff,#f4f7f5)}.lock{font-size:11px;font-weight:900;color:var(--green);background:var(--green2);display:inline-block;padding:5px 8px;border-radius:999px;margin-bottom:8px}.priority-list{display:grid;gap:7px;margin-top:12px}.priority{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px}.rank{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-weight:900}.priority small{display:block;color:var(--muted)}.timeline{display:grid;gap:8px}.phase{border-left:4px solid #d6ded9;padding:8px 10px;background:#fafbf9;border-radius:0 10px 10px 0}.phase b{display:block}.phase span{font-size:12px;color:var(--muted)}.seo{margin-top:28px}.seo h2{font-size:30px;letter-spacing:-.03em}.seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.seo a{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.seo a b{display:block;margin-bottom:5px}.seo a span{font-size:12px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:22px 0;margin-top:30px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-@media(max-width:850px){.hero,.tool{grid-template-columns:1fr}.hero h1{font-size:42px}.features{grid-template-columns:1fr 1fr}.seo-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:850px){.hero,.tool,.journey{grid-template-columns:1fr}.hero h1{font-size:42px}.features{grid-template-columns:1fr 1fr}.seo-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.wrap{padding:12px}.nav{display:none}.hero-main{padding:24px}.hero h1{font-size:36px}.features,.fields,.checks,.stats,.premium-grid,.seo-grid{grid-template-columns:1fr}.big{font-size:38px}}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"HomeFirst90","applicationCategory":"LifestyleApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"GBP"},"description":"Personalised new-home setup cost calculator and first-90-days planner."}</script>
 </head>
 <body>
 <main class="wrap">
-<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan your move-in. Set up your home. Sort your first 90 days.</div><a id="homeStatus" href="/my-home.html" class="pill" style="margin-top:7px;text-decoration:none">My Home: Not saved</a></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="#tools">Free tools</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Buy first</a><a href="/first-90-days-planner.html">90 days</a><button id="install" class="hidden">Install app</button></nav></header>
+<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan the move. Own your first 90 days.</div><a id="homeStatus" href="/my-home.html" class="pill" style="margin-top:7px;text-decoration:none">My Home: Not saved</a></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="#tools">Free planning</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Shopping</a><a href="/first-90-days-planner.html">Pre-move plan</a><button id="install" class="hidden">Install app</button></nav></header>
 
 <section class="hero">
 <div class="hero-main">
-<div class="eyebrow">Free new-home planning tool</div>
+<div class="eyebrow">Plan the move for free</div>
 <h1>How much will your new home cost to set up — and what should you buy first?</h1>
 <p>Build a personalised setup budget in minutes. HomeFirst90 helps you plan the money and the setup before you move. When moving day arrives, HomeFirst90 Complete is designed to take over the organising.</p>
 <div class="actions"><a class="btn btn-light" href="#calculator">Calculate my setup cost</a><a class="btn btn-ghost" href="#tools">Explore the free tools</a></div>
 </div>
 <div class="side">
-<div class="card"><div class="eyebrow" style="color:var(--green)">The free hook</div><h2>New Home Setup Cost</h2><p>A useful answer first. Not just furniture: appliances, bedding, cookware, cleaning, home-office basics and the things that make the home actually work.</p></div>
-<div class="card price-card"><div class="eyebrow">One connected home</div><h2 style="font-size:30px;margin:8px 0 10px">Describe it once. Use it everywhere.</h2><p>Your free results feed My Home on this device. HomeFirst90 Complete is the future paid layer for cloud saving, purchase and task tracking, sharing, reminders and a live “what should I do next?” dashboard.</p></div>
+<div class="card"><div class="eyebrow" style="color:var(--green)">Before you move</div><h2>Work out the money first.</h2><p>Use the free tools to understand moving cash, setup costs, monthly bills, what to buy and what to do before key day.</p></div>
+<div class="card price-card"><div class="eyebrow">From moving day</div><h2 style="font-size:30px;margin:8px 0 10px">That’s where Complete takes over.</h2><p>Your moving-day-to-Day-90 plan, progress, reminders, purchase tracking, sharing and a live “what should I do next?” view.</p><div class="price" style="font-size:30px">£12.99 <span style="font-size:13px;font-weight:700">planned one-off · no subscription</span></div></div>
+</div>
+</section>
+
+<section class="journey">
+<div class="journey-card journey-free">
+<div class="eyebrow" style="color:var(--green)">BEFORE THE KEYS · FREE</div>
+<h2>Plan the move without paying.</h2>
+<p class="muted">Use HomeFirst90 while you are still deciding, budgeting and getting ready.</p>
+<ul>
+<li>Moving-out cash</li>
+<li>New-home setup cost</li>
+<li>Monthly household bills</li>
+<li>Prioritised shopping order</li>
+<li>Personalised pre-move plan</li>
+</ul>
+<a class="btn" style="background:var(--green);color:#fff" href="#tools">Use the free planning tools</a>
+</div>
+<div class="journey-card journey-paid">
+<div class="eyebrow">FROM MOVING DAY · HOMEFIRST90 COMPLETE</div>
+<h2>You’ve planned it. Now manage it.</h2>
+<p>Complete is designed for the point when the keys arrive and all those plans turn into real jobs, purchases and deadlines.</p>
+<ul>
+<li>Personalised Moving Day → Day 90 actions</li>
+<li>What should I do next?</li>
+<li>Track purchases and actual spend</li>
+<li>Progress and reminders</li>
+<li>Share with a partner or housemate</li>
+<li>Cloud access across devices</li>
+</ul>
+<div class="journey-price">£12.99 <span style="font-size:13px;font-weight:700">planned one-off · no subscription</span></div>
+<a class="btn btn-light" href="/my-home.html">See HomeFirst90 Complete</a>
 </div>
 </section>
 
@@ -47,7 +78,7 @@
 <div class="feature"><b>Before & after the keys</b><span>Plan the move for free. Complete manages what happens from moving day onward.</span></div>
 </section>
 
-<section id="tools" class="seo" style="margin-top:20px"><div class="eyebrow" style="color:var(--green)">HomeFirst90 toolbox</div><h2>Free tools for the whole move-in journey</h2><div class="seo-grid">
+<section id="tools" class="seo" style="margin-top:20px"><div class="eyebrow" style="color:var(--green)">HomeFirst90 toolbox</div><h2>Plan everything you can before moving day</h2><div class="seo-grid">
 <a href="/moving-out-budget-calculator.html"><b>Moving Out Budget</b><span>How much cash do I need to get the keys?</span></a>
 <a href="#calculator"><b>New Home Setup Cost</b><span>What will it cost to get the home functioning?</span></a>
 <a href="/household-bills-estimator.html"><b>Household Bills Estimator</b><span>What will the home cost each month?</span></a>
@@ -99,7 +130,7 @@
 </section>
 
 <section class="premium" id="continue">
-<h2>Continue with your home</h2>
+<h2>Build towards moving day</h2>
 <p class="muted">Use the planning tools before you move. HomeFirst90 Complete begins when the keys arrive and the move needs managing.</p>
 <div class="premium-grid">
 <div class="premium-card"><div class="lock">FREE GUIDE</div><h3>What should I buy first?</h3><p class="muted">See the full prioritised shopping order free. Complete adds purchase status, actual spend, sharing and ongoing budget tracking.</p><a class="btn" style="margin-top:12px;background:var(--green);color:#fff" href="/what-to-buy-first.html">Build my shopping order</a></div>
