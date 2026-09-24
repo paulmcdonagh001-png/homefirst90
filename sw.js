@@ -1,4 +1,4 @@
-const CACHE="homefirst90-v3";
+const CACHE="homefirst90-v4";
 const ASSETS=["/manifest.webmanifest","/icon.svg"];
 self.addEventListener("install",event=>{
   self.skipWaiting();
