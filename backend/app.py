@@ -33,6 +33,7 @@ def init_db():
             session_id TEXT PRIMARY KEY,
             email TEXT,
             customer_id TEXT,
+            payment_intent_id TEXT,
             access_key TEXT UNIQUE NOT NULL,
             active BOOLEAN NOT NULL DEFAULT TRUE,
             home_json JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -40,6 +41,7 @@ def init_db():
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         """)
+        cur.execute("ALTER TABLE hf90_entitlements ADD COLUMN IF NOT EXISTS payment_intent_id TEXT")
     else:
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_entitlements (
@@ -53,6 +55,10 @@ def init_db():
             updated_at TEXT NOT NULL
         )
         """)
+        try:
+            cur.execute("ALTER TABLE hf90_entitlements ADD COLUMN payment_intent_id TEXT")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -111,6 +117,7 @@ def save_entitlement(session):
     email = ((session.get("customer_details") or {}).get("email")
              or session.get("customer_email"))
     customer_id = session.get("customer")
+    payment_intent_id = session.get("payment_intent")
     now = datetime.now(timezone.utc).isoformat()
     access_key = "hf90_" + secrets.token_urlsafe(28)
     conn = db()
@@ -118,25 +125,27 @@ def save_entitlement(session):
     if is_postgres():
         cur.execute("""
             INSERT INTO hf90_entitlements
-              (session_id,email,customer_id,access_key,active,home_json,created_at,updated_at)
-            VALUES (%s,%s,%s,%s,TRUE,'{}'::jsonb,NOW(),NOW())
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (%s,%s,%s,%s,%s,TRUE,'{}'::jsonb,NOW(),NOW())
             ON CONFLICT (session_id) DO UPDATE SET
               email=EXCLUDED.email,
               customer_id=EXCLUDED.customer_id,
+              payment_intent_id=EXCLUDED.payment_intent_id,
               active=TRUE,
               updated_at=NOW()
-        """, (session_id, email, customer_id, access_key))
+        """, (session_id, email, customer_id, payment_intent_id, access_key))
     else:
         cur.execute("""
             INSERT INTO hf90_entitlements
-              (session_id,email,customer_id,access_key,active,home_json,created_at,updated_at)
-            VALUES (?,?,?,?,1,'{}',?,?)
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (?,?,?,?,?,1,'{}',?,?)
             ON CONFLICT(session_id) DO UPDATE SET
               email=excluded.email,
               customer_id=excluded.customer_id,
+              payment_intent_id=excluded.payment_intent_id,
               active=1,
               updated_at=excluded.updated_at
-        """, (session_id, email, customer_id, access_key, now, now))
+        """, (session_id, email, customer_id, payment_intent_id, access_key, now, now))
     conn.commit()
     conn.close()
 
@@ -148,6 +157,17 @@ def stripe_webhook():
     event = json.loads(payload.decode("utf-8"))
     if event.get("type") in ("checkout.session.completed", "checkout.session.async_payment_succeeded"):
         save_entitlement((event.get("data") or {}).get("object") or {})
+    elif event.get("type") == "charge.refunded":
+        charge = (event.get("data") or {}).get("object") or {}
+        if charge.get("refunded") and charge.get("payment_intent"):
+            conn = db()
+            cur = conn.cursor()
+            if is_postgres():
+                cur.execute("UPDATE hf90_entitlements SET active=FALSE,updated_at=NOW() WHERE payment_intent_id=%s", (charge.get("payment_intent"),))
+            else:
+                cur.execute("UPDATE hf90_entitlements SET active=0,updated_at=? WHERE payment_intent_id=?", (datetime.now(timezone.utc).isoformat(), charge.get("payment_intent")))
+            conn.commit()
+            conn.close()
     return jsonify({"received": True})
 
 def row_for_session(session_id):
@@ -250,7 +270,7 @@ def home():
 def startup_self_test():
     if not WEBHOOK_SECRET:
         raise RuntimeError("STRIPE_WEBHOOK_SECRET is missing")
-    payload = json.dumps({"type":"checkout.session.completed","data":{"object":{"id":"cs_hf90_startup_test","payment_status":"paid","customer":"cus_hf90_test","customer_details":{"email":"startup-test@homefirst90.invalid"}}}}, separators=(",",":")).encode()
+    payload = json.dumps({"type":"checkout.session.completed","data":{"object":{"id":"cs_hf90_startup_test","payment_status":"paid","customer":"cus_hf90_test","payment_intent":"pi_hf90_test","customer_details":{"email":"startup-test@homefirst90.invalid"}}}}, separators=(",",":")).encode()
     ts = int(time.time())
     sig = hmac.new(WEBHOOK_SECRET.encode(), f"{ts}.".encode() + payload, hashlib.sha256).hexdigest()
     if not verify_stripe_signature(payload, f"t={ts},v1={sig}"):
