@@ -54,6 +54,6 @@ if(home&&Array.isArray(home.rows)){
 }else document.querySelector("#heroText").textContent="Start with the free Setup Cost Calculator. Once calculated, your home snapshot will appear here automatically.";
 if(move&&typeof move.total==="number")document.querySelector("#move").textContent=GBP(move.total);
 if(bills&&typeof bills.total==="number")document.querySelector("#bills").textContent=GBP(bills.total);
-const keys=Object.keys(checks),done=keys.filter(k=>checks[k]).length;
+const keys=Object.keys(checks).filter(k=>k.startsWith("0-")||k.startsWith("1-")),done=keys.filter(k=>checks[k]).length;
 if(keys.length){document.querySelector("#weekText").textContent=done+" of "+keys.length+" free first-week tasks complete";document.querySelector("#weekBar").style.width=(done/keys.length*100)+"%";}
 </script></body></html>
