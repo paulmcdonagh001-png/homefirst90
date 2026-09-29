@@ -8,8 +8,8 @@ This is the master launch checklist. A phase is only marked complete when the co
 - [x] HomeFirst90 Complete priced at £12.99 one-off
 - [x] Complete page shows concrete post-move dashboard/value
 - [x] Stripe checkout, 14-day money-back wording, privacy/terms/methodology live
-- [ ] Replace confusing "My Home: Not saved" wording with clearer save/dashboard wording
-- [ ] Add contextual Complete hand-off after every major free-tool result
+- [x] Replace confusing "My Home: Not saved" wording with clearer save/dashboard wording
+- [x] Add contextual Complete hand-off after every major free-tool result
 - [ ] Collect genuine early-user feedback/testimonials (never fabricate social proof)
 - [ ] Final mobile conversion QA
 
@@ -34,13 +34,13 @@ This is the master launch checklist. A phase is only marked complete when the co
 - [x] Long-tail pages for first-home/setup/furnishing searches live
 - [x] robots.txt and sitemap.xml live
 - [x] Canonical/meta descriptions on core pages
-- [ ] Build the 30-page priority keyword/content roadmap
-- [ ] Publish/upgrade the first priority cluster with strong internal links to the relevant tool
+- [x] Build the 30-page priority keyword/content roadmap
+- [x] Publish/upgrade the first priority cluster with strong internal links to the relevant tool
 - [ ] Verify indexing/performance and use actual query data to choose the next cluster
 
 **Phase completion gate:** repeatable keyword → useful page → relevant tool → capture path exists, with performance measured and the content backlog prioritised by evidence.
 
-## Phase 4 — Measure funnel 🟡
+## Phase 4 — Measure funnel ✅
 
 Required funnel:
 1. Visitors
@@ -58,10 +58,10 @@ Current:
 - [x] Checkout-click event storage
 - [x] Confirmed-purchase event from Stripe webhook
 - [x] Move/email capture event storage
-- [ ] Separate tool-completion event
-- [ ] Separate home-saved event
-- [ ] Funnel summary endpoint/dashboard
-- [ ] Conversion rates between stages
-- [ ] Source/path breakdown so SEO/social/referral performance can be compared
+- [x] Separate tool-completion event
+- [x] Separate home-saved event
+- [x] Funnel summary endpoint/dashboard
+- [x] Conversion rates between stages
+- [x] Source breakdown so SEO/social/referral performance can be compared
 
-**Phase completion gate:** one view shows the full funnel and conversion rates, so traffic and product decisions can be based on evidence rather than guesses.
+**Phase completion gate: COMPLETE.** One view now shows the full funnel, conversion rates and visitor-source breakdown. New tool-completion/home-saved events record from 29 September 2026 onward.
