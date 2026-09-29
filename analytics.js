@@ -16,10 +16,11 @@
     if(p.includes("first-90-days-planner"))return "pre_move_plan";
     return "";
   };
-  const source=()=>{
+  const cleanTag=v=>String(v||"").trim().toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,60);
+  const deriveSource=()=>{
     try{
       const q=new URLSearchParams(location.search);
-      const tagged=(q.get("src")||q.get("utm_source")||"").trim().toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,50);
+      const tagged=cleanTag(q.get("src")||q.get("utm_source"));
       if(tagged)return tagged;
       if(!document.referrer)return "direct";
       const r=new URL(document.referrer);
@@ -28,18 +29,27 @@
       return "external";
     }catch(e){return "unknown"}
   };
+  const q=new URLSearchParams(location.search);
+  const querySource=cleanTag(q.get("src")||q.get("utm_source"));
+  const queryCampaign=cleanTag(q.get("campaign")||q.get("utm_campaign"));
+  let attributedSource=sessionStorage.getItem("hf90-source")||"";
+  let attributedCampaign=sessionStorage.getItem("hf90-campaign")||"";
+  if(querySource){attributedSource=querySource;sessionStorage.setItem("hf90-source",attributedSource)}
+  if(queryCampaign){attributedCampaign=queryCampaign;sessionStorage.setItem("hf90-campaign",attributedCampaign)}
+  if(!attributedSource){attributedSource=deriveSource();sessionStorage.setItem("hf90-source",attributedSource)}
   function track(event,metadata={}){
+    const enriched={source:attributedSource||"unknown",campaign:attributedCampaign||"",...metadata};
     fetch(API+"/api/event",{
       method:"POST",
       mode:"cors",
       keepalive:true,
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({event,path:location.pathname,session:sid,metadata})
+      body:JSON.stringify({event,path:location.pathname,session:sid,metadata:enriched})
     }).catch(()=>{});
   }
   window.hf90Track=track;
 
-  track("page_view",{source:source()});
+  track("page_view");
   if(location.pathname.includes("checkout-success"))track("checkout_return",{stage:"payment_return"});
   if(location.pathname.includes("complete-home"))track("complete_open",{stage:"dashboard"});
 
