@@ -142,10 +142,12 @@ def init_db():
             move_date DATE,
             consent BOOLEAN NOT NULL DEFAULT TRUE,
             entitlement_session_id TEXT,
+            feedback_reminder_sent BOOLEAN NOT NULL DEFAULT FALSE,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         """)
         cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN IF NOT EXISTS source TEXT")
+        cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN IF NOT EXISTS feedback_reminder_sent BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
@@ -222,11 +224,16 @@ def init_db():
             move_date TEXT,
             consent INTEGER NOT NULL DEFAULT 1,
             entitlement_session_id TEXT,
+            feedback_reminder_sent INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL
         )
         """)
         try:
             cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN source TEXT")
+        except Exception:
+            pass
+        try:
+            cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN feedback_reminder_sent INTEGER NOT NULL DEFAULT 0")
         except Exception:
             pass
         cur.execute("""
