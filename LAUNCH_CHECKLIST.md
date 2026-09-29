@@ -86,6 +86,8 @@ Goal: get genuine movers into the funnel organically, learn which acquisition ch
 - [x] Tester source tracking live
 - [x] Main-site campaign source tracking via `?src=` / `utm_source=`
 - [x] Growth dashboard with tracked channel links
+- [x] HomeFirst90 Growth Agent brain + persistent approval queue live
+- [x] Five initial calculator-led acquisition drafts seeded for training
 - [x] Automated tester feedback follow-up after 3 days if no feedback has been submitted
 - [x] Personal Facebook tester post launched
 - [ ] Reach 10 genuine Founding Tester sign-ups
