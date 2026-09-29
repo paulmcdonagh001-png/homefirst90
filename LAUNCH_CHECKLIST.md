@@ -76,3 +76,22 @@ Current:
 - [x] Source breakdown so SEO/social/referral performance can be compared
 
 **Phase completion gate: COMPLETE.** One view now shows the full funnel, conversion rates and visitor-source breakdown. New tool-completion/home-saved events record from 29 September 2026 onward.
+
+
+## Phase 5 — Controlled acquisition 🟡
+
+Goal: get genuine movers into the funnel organically, learn which acquisition channels work, and establish a real conversion baseline before considering paid ads.
+
+- [x] Public self-serve Founding Tester page live
+- [x] Tester source tracking live
+- [x] Main-site campaign source tracking via `?src=` / `utm_source=`
+- [x] Growth dashboard with tracked channel links
+- [x] Personal Facebook tester post launched
+- [ ] Reach 10 genuine Founding Tester sign-ups
+- [ ] Receive at least 5 substantive tester feedback submissions
+- [ ] Review feedback for repeated blockers and fix any material issue
+- [ ] Establish first genuine non-development traffic baseline by channel
+- [ ] Identify at least one repeatable organic acquisition channel
+- [ ] Only consider paid traffic after the above evidence exists
+
+**Phase completion gate:** at least one organic channel repeatedly brings relevant movers, real-user feedback shows no material product blocker, and the site has enough genuine usage to judge its free → capture → Complete funnel without relying on development/test traffic.
