@@ -17,6 +17,7 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() == "true"
 TESTER_INVITE_CODE = os.getenv("TESTER_INVITE_CODE", "")
 TESTER_LIMIT = int(os.getenv("TESTER_LIMIT", "20") or "20")
+FEEDBACK_REVIEW_KEY = os.getenv("FEEDBACK_REVIEW_KEY", "")
 
 COMPLETE_PLAN = [
     {"name":"Moving day + first 48 hours","end":2,"tasks":[
@@ -490,6 +491,40 @@ def tester_status():
         "feedback_received": int(fb[0]),
         "quotable_feedback": int(fb[1]),
     })
+
+
+@app.route("/api/feedback-review")
+def feedback_review():
+    key = request.headers.get("X-Feedback-Key", "")
+    if not FEEDBACK_REVIEW_KEY or not hmac.compare_digest(key, FEEDBACK_REVIEW_KEY):
+        return jsonify({"ok": False, "error": "unauthorised"}), 401
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id,name,email,mover_stage,rating,useful_text,confusing_text,
+               would_pay,quote_text,permission_to_quote,created_at
+        FROM hf90_feedback
+        ORDER BY created_at DESC
+        LIMIT 200
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    items = []
+    for row in rows:
+        items.append({
+            "id": row[0],
+            "name": row[1] or "",
+            "email": row[2] or "",
+            "mover_stage": row[3] or "",
+            "rating": row[4] or 0,
+            "useful_text": row[5] or "",
+            "confusing_text": row[6] or "",
+            "would_pay": row[7] or "",
+            "quote_text": row[8] or "",
+            "permission_to_quote": bool(row[9]),
+            "created_at": str(row[10]),
+        })
+    return jsonify({"ok": True, "count": len(items), "items": items})
 
 
 @app.route("/api/tester-access", methods=["POST", "OPTIONS"])
