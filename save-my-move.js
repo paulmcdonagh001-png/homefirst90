@@ -41,7 +41,8 @@
         move_date:dateInput.value,
         consent:form.elements.consent.checked,
         website:form.elements.website.value,
-        source_path:location.pathname
+        source_path:location.pathname,
+        session:window.hf90SessionId||""
       };
       try{
         const r=await fetch(API+"/api/save-move",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -50,7 +51,6 @@
         localStorage.setItem("homefirst90-saved-move",JSON.stringify({email:body.email,move_date:body.move_date}));
         msg.style.color="#153f33";
         msg.textContent="Saved ✓ We’ll email you around your moving date.";
-        if(window.hf90Track)window.hf90Track("move_saved",{stage:"lead_capture"});
         form.querySelector("button").disabled=true;
         form.querySelector("button").textContent="Saved ✓";
       }catch(err){
