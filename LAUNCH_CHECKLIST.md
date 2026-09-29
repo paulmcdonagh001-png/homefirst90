@@ -14,6 +14,9 @@ This is the master launch checklist. A phase is only marked complete when the co
   - [x] Controlled Founding Tester access for up to 20 people
   - [x] Structured feedback form with explicit permission-to-quote control
   - [x] Tester/feedback progress shown in internal funnel dashboard
+  - [x] Self-serve public Founding Tester recruitment page live
+  - [x] Tester places close automatically at 20
+  - [x] Acquisition source tracking for tester invite links
 - [x] Final mobile conversion QA — homepage, tools, My Home, Complete and Stripe checkout verified on mobile-style flow
 
 **Phase completion gate:** no broken conversion path; every free tool has a natural next step; trust is credible; mobile purchase journey verified.
