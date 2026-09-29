@@ -1,5 +1,5 @@
-import os, json, hmac, hashlib, time, secrets, sqlite3
-from datetime import datetime, timezone
+import os, json, hmac, hashlib, time, secrets, sqlite3, re
+from datetime import datetime, timezone, date
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -52,6 +52,23 @@ def init_db():
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_move_leads (
+            id BIGSERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            move_date DATE NOT NULL,
+            consent BOOLEAN NOT NULL DEFAULT TRUE,
+            consent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            source_path TEXT,
+            unsubscribe_token TEXT UNIQUE NOT NULL,
+            active BOOLEAN NOT NULL DEFAULT TRUE,
+            sent_14 BOOLEAN NOT NULL DEFAULT FALSE,
+            sent_3 BOOLEAN NOT NULL DEFAULT FALSE,
+            sent_0 BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """)
     else:
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_entitlements (
@@ -77,6 +94,23 @@ def init_db():
             session_key TEXT,
             metadata_json TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL
+        )
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_move_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            move_date TEXT NOT NULL,
+            consent INTEGER NOT NULL DEFAULT 1,
+            consent_at TEXT NOT NULL,
+            source_path TEXT,
+            unsubscribe_token TEXT UNIQUE NOT NULL,
+            active INTEGER NOT NULL DEFAULT 1,
+            sent_14 INTEGER NOT NULL DEFAULT 0,
+            sent_3 INTEGER NOT NULL DEFAULT 0,
+            sent_0 INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
         )
         """)
     conn.commit()
@@ -172,7 +206,7 @@ def save_entitlement(session):
 
 ALLOWED_EVENTS = {
     "page_view","tool_run","complete_checkout_click","checkout_return",
-    "purchase_confirmed","complete_open","complete_access_restored"
+    "purchase_confirmed","complete_open","complete_access_restored","move_saved"
 }
 
 def record_event(event_type, path="", session_key="", metadata=None):
@@ -215,6 +249,99 @@ def analytics_event():
         print("HF90_EVENT_ERROR", type(e).__name__, flush=True)
         return jsonify({"ok": False}), 500
     return jsonify({"ok": True})
+
+
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+@app.route("/api/save-move", methods=["POST", "OPTIONS"])
+def save_move():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    data = request.get_json(silent=True) or {}
+    # Honeypot field: normal users never fill this.
+    if str(data.get("website") or "").strip():
+        return jsonify({"ok": True}), 200
+
+    email = str(data.get("email") or "").strip().lower()
+    move_date_raw = str(data.get("move_date") or "").strip()
+    consent = data.get("consent") is True
+    source_path = str(data.get("source_path") or "")[:200]
+
+    if not EMAIL_RE.match(email) or len(email) > 254:
+        return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
+    if not consent:
+        return jsonify({"ok": False, "error": "Please confirm that you want the move-date emails."}), 400
+    try:
+        move_date_value = date.fromisoformat(move_date_raw)
+    except Exception:
+        return jsonify({"ok": False, "error": "Please enter a valid moving date."}), 400
+
+    days_away = (move_date_value - date.today()).days
+    if days_away < 0 or days_away > 730:
+        return jsonify({"ok": False, "error": "Moving date must be between today and two years from now."}), 400
+
+    token = secrets.token_urlsafe(32)
+    now = datetime.now(timezone.utc).isoformat()
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("""
+            INSERT INTO hf90_move_leads
+              (email,move_date,consent,consent_at,source_path,unsubscribe_token,active,sent_14,sent_3,sent_0,created_at,updated_at)
+            VALUES (%s,%s,TRUE,NOW(),%s,%s,TRUE,FALSE,FALSE,FALSE,NOW(),NOW())
+            ON CONFLICT (email) DO UPDATE SET
+              move_date=EXCLUDED.move_date,
+              consent=TRUE,
+              consent_at=NOW(),
+              source_path=EXCLUDED.source_path,
+              unsubscribe_token=EXCLUDED.unsubscribe_token,
+              active=TRUE,
+              sent_14=FALSE,
+              sent_3=FALSE,
+              sent_0=FALSE,
+              updated_at=NOW()
+        """, (email, move_date_value, source_path, token))
+    else:
+        cur.execute("""
+            INSERT INTO hf90_move_leads
+              (email,move_date,consent,consent_at,source_path,unsubscribe_token,active,sent_14,sent_3,sent_0,created_at,updated_at)
+            VALUES (?,?,1,?,?,?,1,0,0,0,?,?)
+            ON CONFLICT(email) DO UPDATE SET
+              move_date=excluded.move_date,
+              consent=1,
+              consent_at=excluded.consent_at,
+              source_path=excluded.source_path,
+              unsubscribe_token=excluded.unsubscribe_token,
+              active=1,
+              sent_14=0,
+              sent_3=0,
+              sent_0=0,
+              updated_at=excluded.updated_at
+        """, (email, move_date_raw, now, source_path, token, now, now))
+    conn.commit()
+    conn.close()
+    try:
+        record_event("move_saved", source_path, "", {"stage":"lead_capture"})
+    except Exception:
+        pass
+    return jsonify({"ok": True, "move_date": move_date_raw})
+
+@app.route("/api/move/unsubscribe/<token>", methods=["GET"])
+def move_unsubscribe(token):
+    if not token or len(token) > 128:
+        return ("Invalid unsubscribe link.", 400)
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("UPDATE hf90_move_leads SET active=FALSE,updated_at=NOW() WHERE unsubscribe_token=%s", (token,))
+    else:
+        cur.execute("UPDATE hf90_move_leads SET active=0,updated_at=? WHERE unsubscribe_token=?", (datetime.now(timezone.utc).isoformat(), token))
+    changed = cur.rowcount
+    conn.commit()
+    conn.close()
+    if not changed:
+        return ("This unsubscribe link is no longer valid.", 404)
+    return ("You have been unsubscribed from HomeFirst90 move-date emails. You can close this page.", 200, {"Content-Type":"text/plain; charset=utf-8"})
 
 @app.route("/webhooks/stripe", methods=["POST"])
 def stripe_webhook():
