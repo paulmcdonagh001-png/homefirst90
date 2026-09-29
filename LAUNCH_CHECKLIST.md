@@ -98,3 +98,21 @@ Goal: get genuine movers into the funnel organically, learn which acquisition ch
 - [ ] Only consider paid traffic after the above evidence exists
 
 **Phase completion gate:** at least one organic channel repeatedly brings relevant movers, real-user feedback shows no material product blocker, and the site has enough genuine usage to judge its free → capture → Complete funnel without relying on development/test traffic.
+
+
+## Phase 6 — Visual product experience ✅
+
+Goal: make calculator results and dashboards faster to understand, more engaging and more product-like without decorative or invented scoring.
+
+- [x] Shared lightweight doughnut/progress-ring visual system
+- [x] Moving Out Budget live doughnut
+- [x] Household Bills live doughnut
+- [x] Setup Cost room/category doughnut
+- [x] My Home transparent planning-progress ring and statuses
+- [x] My Home next-best planning step
+- [x] Complete live task/purchase/spend/progress rings
+- [x] What To Buy First priority rings
+- [x] Pre-move countdown ring and milestone indicators
+- [x] Mobile-responsive visual layout
+
+**Phase completion gate: COMPLETE.** Core visuals are driven by real HomeFirst90 user/calculator data, retain textual results, and lead into useful next actions rather than acting as decoration.
