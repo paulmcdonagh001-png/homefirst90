@@ -18,6 +18,7 @@ MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() ==
 TESTER_INVITE_CODE = os.getenv("TESTER_INVITE_CODE", "")
 TESTER_LIMIT = int(os.getenv("TESTER_LIMIT", "20") or "20")
 FEEDBACK_REVIEW_KEY = os.getenv("FEEDBACK_REVIEW_KEY", "")
+GROWTH_REVIEW_KEY = os.getenv("GROWTH_REVIEW_KEY", "")
 
 COMPLETE_PLAN = [
     {"name":"Moving day + first 48 hours","end":2,"tasks":[
@@ -149,6 +150,21 @@ def init_db():
         cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN IF NOT EXISTS source TEXT")
         cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN IF NOT EXISTS feedback_reminder_sent BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_growth_drafts (
+            id BIGSERIAL PRIMARY KEY,
+            status TEXT NOT NULL DEFAULT 'draft',
+            topic TEXT NOT NULL,
+            hook TEXT NOT NULL,
+            destination_path TEXT NOT NULL,
+            channels_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+            copy_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+            visual_brief TEXT,
+            rationale TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            reviewed_at TIMESTAMPTZ
+        )
+        """)
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
             name TEXT,
@@ -237,6 +253,21 @@ def init_db():
         except Exception:
             pass
         cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_growth_drafts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            status TEXT NOT NULL DEFAULT 'draft',
+            topic TEXT NOT NULL,
+            hook TEXT NOT NULL,
+            destination_path TEXT NOT NULL,
+            channels_json TEXT NOT NULL DEFAULT '[]',
+            copy_json TEXT NOT NULL DEFAULT '{}',
+            visual_brief TEXT,
+            rationale TEXT,
+            created_at TEXT NOT NULL,
+            reviewed_at TEXT
+        )
+        """)
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -271,8 +302,103 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+HF90_GROWTH_SEEDS = [
+    {
+        "topic":"Moving-out cash",
+        "hook":"Moving into your first place? Your deposit and first month's rent aren't the full number.",
+        "destination":"/moving-out-budget-calculator.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "copy":{
+            "facebook":"Moving into your first place? The deposit and first month's rent are only part of the number. There’s moving costs, setup essentials, first bills and the cash you need left afterwards. HomeFirst90 has a free moving-out budget calculator that puts the lot in one place.",
+            "instagram":"Deposit sorted? Good. Now count the rest: moving costs, setup essentials, first bills and emergency cash. The free HomeFirst90 moving-out calculator helps you see the full number before the keys arrive.",
+            "pinterest":"How much money do you really need to move out? Use the free HomeFirst90 moving-out budget calculator to include upfront housing, moving costs, setup essentials, first bills and emergency cash.",
+            "youtube":"Your deposit isn't your moving budget. Before you move out, add the moving costs, setup essentials, first household bills and some emergency cash. HomeFirst90 has a free calculator that works through the whole number."
+        },
+        "visual":"Five stacked cost buckets: upfront housing, moving costs, setup essentials, first bills, emergency cash. Clean HomeFirst90 branding.",
+        "rationale":"High-intent first-home problem with a direct calculator answer."
+    },
+    {
+        "topic":"£2,000 setup budget",
+        "hook":"Got £2,000 to set up a new home? Don't spend it room by room in the order you walk through the door.",
+        "destination":"/what-to-buy-first.html",
+        "channels":["facebook","instagram","pinterest"],
+        "copy":{
+            "facebook":"Got a fixed budget to set up a new home? Start with what makes the place function, keep some emergency cash back, then push the lower-priority furniture and decor down the list. The free HomeFirst90 What To Buy First tool builds the order around your budget.",
+            "instagram":"A setup budget disappears quickly if everything feels urgent. Split it into Need now / Buy soon / Can wait, and keep emergency cash back. HomeFirst90's free What To Buy First tool does the sorting for you.",
+            "pinterest":"New-home shopping order: Need now, Buy soon, Can wait. Use HomeFirst90's free tool to prioritise your setup budget before filling the basket."
+        },
+        "visual":"Three columns: Need now / Buy soon / Can wait, plus a small emergency-cash reserve.",
+        "rationale":"Strong visual format and naturally leads into the prioritisation tool."
+    },
+    {
+        "topic":"Real monthly home cost",
+        "hook":"Rent is the headline number. The monthly total is the number that actually matters.",
+        "destination":"/household-bills-estimator.html",
+        "channels":["facebook","pinterest","youtube"],
+        "copy":{
+            "facebook":"Rent is only the headline number. Council tax, energy, water, broadband and the smaller recurring costs all sit beside it. HomeFirst90's free household-bills estimator helps you work out the monthly total before you commit.",
+            "pinterest":"First-flat monthly bills checklist: council tax, energy, water, broadband and recurring household costs. Estimate the full monthly total free with HomeFirst90.",
+            "youtube":"Before you decide whether a flat is affordable, don't stop at the rent. Add council tax, energy, water, broadband and the smaller household costs. HomeFirst90 has a free bills estimator that puts the monthly total together."
+        },
+        "visual":"Large rent figure beside a second stack labelled Real monthly home cost with the additional bills underneath.",
+        "rationale":"Common budgeting mistake with a strong calculator destination."
+    },
+    {
+        "topic":"First night essentials",
+        "hook":"First night in the new place? You need far less than a fully furnished home — but a few missing things are incredibly annoying.",
+        "destination":"/first-night-new-home-essentials.html",
+        "channels":["instagram","pinterest","facebook","youtube"],
+        "copy":{
+            "instagram":"First night in the new place? Forget making every room perfect. Sort sleep, bathroom basics, food/drink, charging, lighting, cleaning and the important keys/safety bits first.",
+            "pinterest":"First-night new-home essentials: sleep, bathroom, food/drink, charging, lighting, cleaning and keys. Save the full HomeFirst90 checklist for moving day.",
+            "facebook":"You do not need a finished home on night one. You do need somewhere to sleep, bathroom basics, something to eat and drink, chargers, light, cleaning bits and working keys. HomeFirst90 has the first-night list in one place.",
+            "youtube":"Your first night in a new home doesn't need a sofa, artwork and matching mugs. It does need a bed, bathroom basics, food and drink, chargers, light, cleaning bits and working keys. HomeFirst90 has the full first-night checklist."
+        },
+        "visual":"A simple labelled 'First-night box' with seven essentials.",
+        "rationale":"Highly saveable/shareable content and a natural bridge toward post-move Complete."
+    },
+    {
+        "topic":"Four weeks to moving day",
+        "hook":"Four weeks until moving day? This is when a bit of admin starts saving you grief later.",
+        "destination":"/first-90-days-planner.html",
+        "channels":["facebook","instagram","pinterest"],
+        "copy":{
+            "facebook":"Four weeks out is a good time to stop keeping the move in your head. Start the address/admin jobs, check what needs booking, work out what you're buying and give each week a short list. HomeFirst90's free planner builds the timeline around your move.",
+            "instagram":"4 weeks → 2 weeks → 1 week → day before. Moving gets much easier when the jobs have somewhere to live other than your head. Build a free personalised plan with HomeFirst90.",
+            "pinterest":"Moving-house timeline: 4 weeks, 2 weeks, 1 week, day before. Build your personalised free HomeFirst90 pre-move plan."
+        },
+        "visual":"Simple four-stage timeline: 4 weeks / 2 weeks / 1 week / day before.",
+        "rationale":"Good planning intent and naturally demonstrates the personalised planner."
+    }
+]
+
+def seed_growth_drafts():
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM hf90_growth_drafts")
+    if int(cur.fetchone()[0]) == 0:
+        for item in HF90_GROWTH_SEEDS:
+            channels = json.dumps(item["channels"])
+            copies = json.dumps(item["copy"])
+            if is_postgres():
+                cur.execute("""
+                    INSERT INTO hf90_growth_drafts
+                      (status,topic,hook,destination_path,channels_json,copy_json,visual_brief,rationale,created_at)
+                    VALUES ('draft',%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,NOW())
+                """, (item["topic"],item["hook"],item["destination"],channels,copies,item["visual"],item["rationale"]))
+            else:
+                cur.execute("""
+                    INSERT INTO hf90_growth_drafts
+                      (status,topic,hook,destination_path,channels_json,copy_json,visual_brief,rationale,created_at)
+                    VALUES ('draft',?,?,?,?,?,?,?,?)
+                """, (item["topic"],item["hook"],item["destination"],channels,copies,item["visual"],item["rationale"],datetime.now(timezone.utc).isoformat()))
+        conn.commit()
+    conn.close()
+
 # Initialise persistent storage when the service boots.
 init_db()
+seed_growth_drafts()
 print("HomeFirst90 storage ready:", "postgres" if is_postgres() else "temporary-sqlite", flush=True)
 
 def cors(resp):
@@ -280,7 +406,7 @@ def cors(resp):
     if origin in ALLOWED_ORIGINS:
         resp.headers["Access-Control-Allow-Origin"] = origin
         resp.headers["Vary"] = "Origin"
-        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Feedback-Key, X-Growth-Key"
         resp.headers["Access-Control-Allow-Methods"] = "GET, PUT, POST, OPTIONS"
     return resp
 
@@ -502,6 +628,82 @@ def funnel_summary():
         "stages": stages,
         "sources": [{"source": k, "visitors": v} for k, v in sorted(source_counts.items(), key=lambda x: (-x[1], x[0]))],
     })
+
+
+def _growth_authorised():
+    key = request.headers.get("X-Growth-Key", "")
+    return bool(GROWTH_REVIEW_KEY and hmac.compare_digest(key, GROWTH_REVIEW_KEY))
+
+@app.route("/api/growth-agent/queue")
+def growth_agent_queue():
+    if not _growth_authorised():
+        return jsonify({"ok": False, "error": "unauthorised"}), 401
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id,status,topic,hook,destination_path,channels_json,copy_json,
+               visual_brief,rationale,created_at,reviewed_at
+        FROM hf90_growth_drafts
+        ORDER BY CASE status WHEN 'draft' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, id DESC
+        LIMIT 100
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    items=[]
+    for r in rows:
+        channels=r[5]
+        copies=r[6]
+        if isinstance(channels,str):
+            try: channels=json.loads(channels)
+            except Exception: channels=[]
+        if isinstance(copies,str):
+            try: copies=json.loads(copies)
+            except Exception: copies={}
+        items.append({
+            "id":r[0],"status":r[1],"topic":r[2],"hook":r[3],"destination_path":r[4],
+            "channels":channels if isinstance(channels,list) else [],
+            "copy":copies if isinstance(copies,dict) else {},
+            "visual_brief":r[7] or "","rationale":r[8] or "",
+            "created_at":str(r[9]),"reviewed_at":str(r[10] or "")
+        })
+    return jsonify({"ok": True, "items": items})
+
+@app.route("/api/growth-agent/action", methods=["POST","OPTIONS"])
+def growth_agent_action():
+    if request.method == "OPTIONS":
+        return ("",204)
+    if not _growth_authorised():
+        return jsonify({"ok": False, "error": "unauthorised"}), 401
+    data=request.get_json(silent=True) or {}
+    try:
+        draft_id=int(data.get("id"))
+    except Exception:
+        return jsonify({"ok":False,"error":"invalid id"}),400
+    action=str(data.get("action") or "")
+    if action not in ("approve","reject","save"):
+        return jsonify({"ok":False,"error":"invalid action"}),400
+    conn=db()
+    cur=conn.cursor()
+    if action=="save":
+        hook=str(data.get("hook") or "")[:500]
+        visual=str(data.get("visual_brief") or "")[:2000]
+        copies=data.get("copy") if isinstance(data.get("copy"),dict) else {}
+        safe_copies={str(k)[:40]:str(v)[:4000] for k,v in copies.items()}
+        raw=json.dumps(safe_copies)
+        if is_postgres():
+            cur.execute("UPDATE hf90_growth_drafts SET hook=%s,visual_brief=%s,copy_json=%s::jsonb WHERE id=%s",(hook,visual,raw,draft_id))
+        else:
+            cur.execute("UPDATE hf90_growth_drafts SET hook=?,visual_brief=?,copy_json=? WHERE id=?",(hook,visual,raw,draft_id))
+    else:
+        status="approved" if action=="approve" else "rejected"
+        if is_postgres():
+            cur.execute("UPDATE hf90_growth_drafts SET status=%s,reviewed_at=NOW() WHERE id=%s",(status,draft_id))
+        else:
+            cur.execute("UPDATE hf90_growth_drafts SET status=?,reviewed_at=? WHERE id=?",(status,datetime.now(timezone.utc).isoformat(),draft_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok":True,"id":draft_id,"action":action})
+
 
 
 @app.route("/api/tester-status")
