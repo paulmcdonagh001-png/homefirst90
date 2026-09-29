@@ -21,9 +21,9 @@ def fmt_date(d):
 def choose_milestone(days_left, row):
     if days_left == 0 and not row["sent_0"]:
         return "0"
-    if 1 <= days_left <= 3 and not row["sent_3"]:
+    if days_left == 3 and not row["sent_3"]:
         return "3"
-    if 4 <= days_left <= 14 and not row["sent_14"]:
+    if days_left == 14 and not row["sent_14"]:
         return "14"
     return None
 
@@ -35,6 +35,7 @@ def send_email(row, milestone):
         "from":FROM,
         "to":[row["email"]],
         "subject":cfg["subject"],
+        "reply_to":["support@homefirst90.com"],
         "template":{
             "id":cfg["id"],
             "variables":{
