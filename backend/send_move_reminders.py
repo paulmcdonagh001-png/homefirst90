@@ -74,6 +74,82 @@ def send_email(row, milestone):
         detail=e.read().decode("utf-8","replace")[:500]
         raise RuntimeError(f"Resend HTTP {e.code}: {detail}")
 
+
+def send_tester_feedback_email(row):
+    feedback_url=f"{SITE_BASE}/feedback.html"
+    html=f"""
+    <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17201d">
+      <h2 style="color:#153f33">How did HomeFirst90 work for you?</h2>
+      <p>Thanks for joining the HomeFirst90 Founding Tester programme.</p>
+      <p>You’ve had a few days to explore the free planning tools and Complete. The most useful thing you can do now is tell us what was genuinely useful, confusing or missing.</p>
+      <p>There is no requirement to leave a positive review. Critical feedback is just as useful.</p>
+      <p><a href="{feedback_url}" style="display:inline-block;background:#153f33;color:white;text-decoration:none;padding:12px 16px;border-radius:9px;font-weight:bold">Send my feedback</a></p>
+      <p style="color:#61706a;font-size:13px">This is a one-time tester follow-up because you joined the Founding Tester programme.</p>
+    </div>
+    """
+    payload={
+        "from":FROM,
+        "to":[row["email"]],
+        "subject":"How did HomeFirst90 work for you?",
+        "reply_to":["support@homefirst90.com"],
+        "html":html,
+        "tags":[
+            {"name":"product","value":"homefirst90"},
+            {"name":"sequence","value":"founding-tester"},
+            {"name":"milestone","value":"feedback"}
+        ]
+    }
+    data=json.dumps(payload).encode("utf-8")
+    req=urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=data,
+        method="POST",
+        headers={
+            "Authorization":f"Bearer {RESEND_API_KEY}",
+            "Content-Type":"application/json",
+            "Idempotency-Key":f"hf90-tester-feedback-{row['id']}"
+        }
+    )
+    try:
+        with urllib.request.urlopen(req,timeout=20) as resp:
+            body=json.loads(resp.read().decode("utf-8") or "{}")
+            if resp.status < 200 or resp.status >= 300:
+                raise RuntimeError(f"Resend status {resp.status}")
+            return body.get("id","sent")
+    except urllib.error.HTTPError as e:
+        detail=e.read().decode("utf-8","replace")[:500]
+        raise RuntimeError(f"Resend HTTP {e.code}: {detail}")
+
+
+def run_tester_feedback_reminders(conn, today):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT a.id,a.email
+            FROM hf90_tester_applications a
+            WHERE COALESCE(a.feedback_reminder_sent,FALSE)=FALSE
+              AND a.created_at <= NOW() - INTERVAL '3 days'
+              AND NOT EXISTS (
+                SELECT 1 FROM hf90_feedback f
+                WHERE LOWER(COALESCE(f.email,''))=LOWER(a.email)
+              )
+            ORDER BY a.created_at,a.id
+            LIMIT 100
+        """)
+        rows=cur.fetchall()
+    sent=0
+    for row in rows:
+        try:
+            email_id=send_tester_feedback_email(row)
+            with conn.cursor() as cur:
+                cur.execute("UPDATE hf90_tester_applications SET feedback_reminder_sent=TRUE WHERE id=%s",(row["id"],))
+            conn.commit()
+            sent+=1
+            print("HF90_TESTER_FEEDBACK_REMINDER_SENT",row["id"],email_id,flush=True)
+        except Exception as e:
+            conn.rollback()
+            print("HF90_TESTER_FEEDBACK_REMINDER_ERROR",row["id"],type(e).__name__,str(e)[:300],flush=True)
+    return sent
+
 def run_reminders(database_url, resend_api_key):
     global DATABASE_URL, RESEND_API_KEY
     DATABASE_URL=database_url
@@ -118,8 +194,9 @@ def run_reminders(database_url, resend_api_key):
                 WHERE active=TRUE AND move_date < %s - INTERVAL '30 days'
             """,(today,))
         conn.commit()
-        print("HF90_REMINDER_RUN",today.isoformat(),"sent",sent,flush=True)
-        return {"date":today.isoformat(),"sent":sent}
+        tester_followups=run_tester_feedback_reminders(conn,today)
+        print("HF90_REMINDER_RUN",today.isoformat(),"sent",sent,"tester_followups",tester_followups,flush=True)
+        return {"date":today.isoformat(),"sent":sent,"tester_followups":tester_followups}
     finally:
         conn.close()
 
