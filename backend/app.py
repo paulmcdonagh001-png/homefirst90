@@ -467,6 +467,31 @@ def funnel_summary():
     })
 
 
+@app.route("/api/tester-status")
+def tester_status():
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=%s", ("tester",))
+    else:
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=?", ("tester",))
+    used = int(cur.fetchone()[0])
+    if is_postgres():
+        cur.execute("SELECT COUNT(*), COALESCE(SUM(CASE WHEN permission_to_quote THEN 1 ELSE 0 END),0) FROM hf90_feedback")
+    else:
+        cur.execute("SELECT COUNT(*), COALESCE(SUM(CASE WHEN permission_to_quote=1 THEN 1 ELSE 0 END),0) FROM hf90_feedback")
+    fb = cur.fetchone()
+    conn.close()
+    return jsonify({
+        "enabled": bool(TESTER_INVITE_CODE),
+        "limit": TESTER_LIMIT,
+        "used": used,
+        "remaining": max(0, TESTER_LIMIT - used),
+        "feedback_received": int(fb[0]),
+        "quotable_feedback": int(fb[1]),
+    })
+
+
 @app.route("/api/tester-access", methods=["POST", "OPTIONS"])
 def tester_access():
     if request.method == "OPTIONS":
