@@ -166,6 +166,7 @@ def init_db():
         """)
         cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN IF NOT EXISTS campaign_key TEXT")
         cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN IF NOT EXISTS generation_note TEXT")
+        cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN IF NOT EXISTS publish_json JSONB NOT NULL DEFAULT '{}'::jsonb")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
@@ -275,6 +276,10 @@ def init_db():
             pass
         try:
             cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN generation_note TEXT")
+        except Exception:
+            pass
+        try:
+            cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN publish_json TEXT NOT NULL DEFAULT '{}'")
         except Exception:
             pass
         cur.execute("""
@@ -902,7 +907,7 @@ def growth_agent_queue():
     cur = conn.cursor()
     cur.execute("""
         SELECT id,status,topic,hook,destination_path,channels_json,copy_json,
-               visual_brief,rationale,created_at,reviewed_at,campaign_key,generation_note
+               visual_brief,rationale,created_at,reviewed_at,campaign_key,generation_note,publish_json
         FROM hf90_growth_drafts
         ORDER BY CASE status WHEN 'draft' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, id DESC
         LIMIT 100
@@ -925,7 +930,8 @@ def growth_agent_queue():
             "copy":copies if isinstance(copies,dict) else {},
             "visual_brief":r[7] or "","rationale":r[8] or "",
             "created_at":str(r[9]),"reviewed_at":str(r[10] or ""),
-            "campaign_key":r[11] or "","generation_note":r[12] or ""
+            "campaign_key":r[11] or "","generation_note":r[12] or "",
+            "publish": (json.loads(r[13]) if isinstance(r[13],str) and r[13] else (r[13] if isinstance(r[13],dict) else {}))
         })
     return jsonify({"ok": True, "items": items})
 
@@ -1079,6 +1085,44 @@ def growth_agent_visual(draft_id):
     </svg>'''
     from flask import Response
     return Response(svg,mimetype="image/svg+xml")
+
+@app.route("/api/growth-agent/mark-published", methods=["POST","OPTIONS"])
+def growth_agent_mark_published():
+    if request.method=="OPTIONS":
+        return ("",204)
+    if not _growth_authorised():
+        return jsonify({"ok":False,"error":"unauthorised"}),401
+    data=request.get_json(silent=True) or {}
+    try:
+        draft_id=int(data.get("id"))
+    except Exception:
+        return jsonify({"ok":False,"error":"invalid id"}),400
+    channel=re.sub(r"[^a-zA-Z0-9_\-]","",str(data.get("channel") or ""))[:40]
+    external_id=str(data.get("external_id") or "")[:200]
+    external_url=str(data.get("external_url") or "")[:500]
+    if not channel:
+        return jsonify({"ok":False,"error":"channel required"}),400
+    conn=db();cur=conn.cursor()
+    if is_postgres():
+        cur.execute("SELECT publish_json FROM hf90_growth_drafts WHERE id=%s",(draft_id,))
+    else:
+        cur.execute("SELECT publish_json FROM hf90_growth_drafts WHERE id=?",(draft_id,))
+    row=cur.fetchone()
+    if not row:
+        conn.close();return jsonify({"ok":False,"error":"not found"}),404
+    pub=row[0]
+    if isinstance(pub,str):
+        try: pub=json.loads(pub)
+        except Exception: pub={}
+    if not isinstance(pub,dict): pub={}
+    pub[channel]={"published_at":datetime.now(timezone.utc).isoformat(),"external_id":external_id,"external_url":external_url}
+    raw=json.dumps(pub)
+    if is_postgres():
+        cur.execute("UPDATE hf90_growth_drafts SET publish_json=%s::jsonb WHERE id=%s",(raw,draft_id))
+    else:
+        cur.execute("UPDATE hf90_growth_drafts SET publish_json=? WHERE id=?",(raw,draft_id))
+    conn.commit();conn.close()
+    return jsonify({"ok":True,"id":draft_id,"channel":channel})
 
 @app.route("/api/growth-agent/action", methods=["POST","OPTIONS"])
 def growth_agent_action():
