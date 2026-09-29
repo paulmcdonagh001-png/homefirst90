@@ -18,6 +18,9 @@
   };
   const source=()=>{
     try{
+      const q=new URLSearchParams(location.search);
+      const tagged=(q.get("src")||q.get("utm_source")||"").trim().toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,50);
+      if(tagged)return tagged;
       if(!document.referrer)return "direct";
       const r=new URL(document.referrer);
       if(r.hostname===location.hostname)return "internal";
