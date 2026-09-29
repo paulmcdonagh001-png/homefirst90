@@ -25,7 +25,7 @@
 </head>
 <body>
 <main class="wrap">
-<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan the move. Own your first 90 days.</div><a id="homeStatus" href="/my-home.html" class="pill" style="margin-top:7px;text-decoration:none">My Home: Not saved</a></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="/complete.html">Complete</a><a href="#tools">Free planning</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Shopping</a><a href="/first-90-days-planner.html">Pre-move plan</a><button id="install" class="hidden">Install app</button></nav></header>
+<header class="top"><div><div class="brand">HomeFirst90</div><div class="tag">Plan the move. Own your first 90 days.</div><a id="homeStatus" href="/my-home.html" class="pill" style="margin-top:7px;text-decoration:none">My Home · Start here</a></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="/complete.html">Complete</a><a href="#tools">Free planning</a><a href="#calculator">Setup cost</a><a href="/household-bills-estimator.html">Bills</a><a href="/what-to-buy-first.html">Shopping</a><a href="/first-90-days-planner.html">Pre-move plan</a><button id="install" class="hidden">Install app</button></nav></header>
 
 <section class="hero">
 <div class="hero-main">
@@ -193,10 +193,10 @@ function render(){
  const groups={};rows.forEach(r=>(groups[r.room]??=[]).push(r));
  q("#rooms").innerHTML=Object.entries(groups).map(([room,rs])=>'<div class="room"><div class="room-head"><span>'+room+'</span><span>'+GBP.format(rs.reduce((s,r)=>s+r.cost,0))+'</span></div>'+rs.map(r=>'<div class="item"><div><b>'+r.name+(r.qty>1?" × "+r.qty:"")+'</b><small>'+({now:"Need now",month:"Buy soon",later:"Can wait"}[r.stage])+(r.owned?" · already covered":"")+'</small></div><b>'+GBP.format(r.cost)+'</b></div>').join("")+'</div>').join("");
 }
-q("#form").addEventListener("submit",e=>{e.preventDefault();build();localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows}));q("#homeStatus").textContent="My Home: Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
+q("#form").addEventListener("submit",e=>{e.preventDefault();build();localStorage.setItem("homefirst90-home",JSON.stringify({profile,rows}));q("#homeStatus").textContent="My Home · Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render();q("#result").scrollIntoView({behavior:"smooth",block:"start"})});
 
 const params=new URLSearchParams(location.search);if(params.get("bedrooms"))q("#bedrooms").value=params.get("bedrooms");if(params.get("property"))q("#property").value=params.get("property");
-try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];q("#homeStatus").textContent="My Home: Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render()}}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem("homefirst90-home")||"null");if(saved){profile=saved.profile;rows=saved.rows||[];q("#homeStatus").textContent="My Home · Saved ✓";q("#empty").classList.add("hidden");q("#result").classList.remove("hidden");render()}}catch(e){}
 let deferred;const ib=q("#install");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.classList.remove("hidden")});ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;ib.classList.add("hidden")});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
