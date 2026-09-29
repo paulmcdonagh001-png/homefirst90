@@ -10,7 +10,7 @@ This is the master launch checklist. A phase is only marked complete when the co
 - [x] Stripe checkout, 14-day money-back wording, privacy/terms/methodology live
 - [x] Replace confusing "My Home: Not saved" wording with clearer save/dashboard wording
 - [x] Add contextual Complete hand-off after every major free-tool result
-- [ ] Collect genuine early-user feedback/testimonials (never fabricate social proof)
+- [ ] Collect genuine early-user feedback/testimonials (tester activation, consented quote capture and private review dashboard are live; waiting on real responses)
   - [x] Controlled Founding Tester access for up to 20 people
   - [x] Structured feedback form with explicit permission-to-quote control
   - [x] Tester/feedback progress shown in internal funnel dashboard
