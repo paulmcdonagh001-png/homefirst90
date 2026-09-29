@@ -5,6 +5,8 @@
     sid=(self.crypto&&crypto.randomUUID)?crypto.randomUUID():"s_"+Date.now()+"_"+Math.random().toString(36).slice(2);
     sessionStorage.setItem("hf90-session",sid);
   }
+  window.hf90SessionId=sid;
+
   const toolName=()=>{
     const p=location.pathname;
     if(p==="/"||p==="/index.html")return "setup_cost";
@@ -33,19 +35,49 @@
     }).catch(()=>{});
   }
   window.hf90Track=track;
+
   track("page_view",{source:source()});
   if(location.pathname.includes("checkout-success"))track("checkout_return",{stage:"payment_return"});
   if(location.pathname.includes("complete-home"))track("complete_open",{stage:"dashboard"});
+
+  // Record a completion when a free tool actually saves a result, not merely when the user clicks.
+  const completionKeys={
+    "homefirst90-home":"setup_cost",
+    "homefirst90-moving":"moving_out_budget",
+    "homefirst90-bills":"household_bills",
+    "homefirst90-move-profile":"pre_move_plan"
+  };
+  const originalSetItem=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(key,value){
+    const out=originalSetItem.apply(this,arguments);
+    try{
+      if(this===localStorage&&completionKeys[key]){
+        const tool=completionKeys[key];
+        track("tool_complete",{tool,stage:"complete"});
+        if(key==="homefirst90-home")track("home_saved",{stage:"home_profile"});
+      }
+    }catch(e){}
+    return out;
+  };
+
   let lastTool=0;
   function toolRun(){
     const now=Date.now(); if(now-lastTool<800)return; lastTool=now;
-    const t=toolName(); if(t)track("tool_run",{tool:t});
+    const t=toolName(); if(t)track("tool_run",{tool:t,stage:"start"});
   }
+
   document.addEventListener("submit",toolRun,true);
   document.addEventListener("click",e=>{
     const a=e.target.closest&&e.target.closest("a");
     if(a&&/buy\.stripe\.com/i.test(a.href||""))track("complete_checkout_click",{stage:"checkout"});
+
     const b=e.target.closest&&e.target.closest("button");
     if(b&&(b.id==="run"||b.id==="build"))toolRun();
+
+    // The shopping-order tool renders without writing a separate result to localStorage,
+    // so a successful click is its completion signal.
+    if(b&&b.id==="run"&&toolName()==="buy_first"){
+      setTimeout(()=>track("tool_complete",{tool:"buy_first",stage:"complete"}),0);
+    }
   },true);
 })();
