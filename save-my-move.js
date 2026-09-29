@@ -67,6 +67,14 @@
       }catch(e){}
     }
   }
-  if(host==="preview")card();
+  async function autoMount(){
+    if(host==="preview"){card();return}
+    try{
+      const r=await fetch(API+"/api/move/status",{cache:"no-store"});
+      const d=await r.json();
+      if(d&&d.enabled)card();
+    }catch(e){}
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",autoMount);else autoMount();
   window.HomeFirst90SaveMove={mount:card};
 })();
