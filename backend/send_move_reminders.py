@@ -73,7 +73,10 @@ def send_email(row, milestone):
         detail=e.read().decode("utf-8","replace")[:500]
         raise RuntimeError(f"Resend HTTP {e.code}: {detail}")
 
-def main():
+def run_reminders(database_url, resend_api_key):
+    global DATABASE_URL, RESEND_API_KEY
+    DATABASE_URL=database_url
+    RESEND_API_KEY=resend_api_key
     if not DATABASE_URL or not RESEND_API_KEY:
         raise RuntimeError("DATABASE_URL and RESEND_API_KEY are required")
     today=datetime.now(ZoneInfo("Europe/London")).date()
@@ -115,8 +118,12 @@ def main():
             """,(today,))
         conn.commit()
         print("HF90_REMINDER_RUN",today.isoformat(),"sent",sent,flush=True)
+        return {"date":today.isoformat(),"sent":sent}
     finally:
         conn.close()
+
+def main():
+    run_reminders(DATABASE_URL, RESEND_API_KEY)
 
 if __name__=="__main__":
     main()
