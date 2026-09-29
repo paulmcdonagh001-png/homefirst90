@@ -1,5 +1,5 @@
 import os, json, hmac, hashlib, time, secrets, sqlite3, re
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from zoneinfo import ZoneInfo
 from flask import Flask, request, jsonify
 
@@ -291,7 +291,8 @@ def save_entitlement(session):
 
 
 ALLOWED_EVENTS = {
-    "page_view","tool_run","complete_checkout_click","checkout_return",
+    "page_view","tool_run","tool_complete","home_saved",
+    "complete_checkout_click","checkout_return",
     "purchase_confirmed","complete_open","complete_access_restored","move_saved"
 }
 
@@ -337,6 +338,102 @@ def analytics_event():
     return jsonify({"ok": True})
 
 
+@app.route("/api/funnel")
+def funnel_summary():
+    try:
+        days = int(request.args.get("days", "30"))
+    except Exception:
+        days = 30
+    days = max(1, min(days, 365))
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("""
+            SELECT event_type,path,session_key,metadata_json,created_at
+            FROM hf90_events
+            WHERE created_at >= %s
+            ORDER BY created_at ASC
+        """, (cutoff,))
+    else:
+        cur.execute("""
+            SELECT event_type,path,session_key,metadata_json,created_at
+            FROM hf90_events
+            WHERE created_at >= ?
+            ORDER BY created_at ASC
+        """, (cutoff.isoformat(),))
+    rows = cur.fetchall()
+    conn.close()
+
+    counts = {
+        "visitors": 0,
+        "tool_starts": 0,
+        "tool_completions": 0,
+        "homes_saved": 0,
+        "emails_captured": 0,
+        "complete_views": 0,
+        "checkout_starts": 0,
+        "purchases": 0,
+    }
+    visitor_sessions = set()
+    first_source = {}
+
+    for row in rows:
+        event_type, path, session_key, metadata = row[0], row[1] or "", row[2] or "", row[3]
+        if isinstance(metadata, str):
+            try:
+                metadata = json.loads(metadata)
+            except Exception:
+                metadata = {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+
+        if event_type == "page_view" and session_key and session_key != "startup-test":
+            visitor_sessions.add(session_key)
+            if session_key not in first_source:
+                first_source[session_key] = str(metadata.get("source") or "unknown")
+        if event_type == "tool_run":
+            counts["tool_starts"] += 1
+        elif event_type == "tool_complete":
+            counts["tool_completions"] += 1
+        elif event_type == "home_saved":
+            counts["homes_saved"] += 1
+        elif event_type == "move_saved":
+            counts["emails_captured"] += 1
+        elif event_type == "page_view" and path in ("/complete.html", "/complete"):
+            counts["complete_views"] += 1
+        elif event_type == "complete_checkout_click":
+            counts["checkout_starts"] += 1
+        elif event_type == "purchase_confirmed":
+            counts["purchases"] += 1
+
+    counts["visitors"] = len(visitor_sessions)
+    source_counts = {}
+    for src in first_source.values():
+        source_counts[src] = source_counts.get(src, 0) + 1
+
+    order = ["visitors","tool_starts","tool_completions","homes_saved","emails_captured","complete_views","checkout_starts","purchases"]
+    stages = []
+    previous = None
+    for key in order:
+        value = counts[key]
+        stages.append({
+            "key": key,
+            "count": value,
+            "from_previous_pct": None if previous in (None, 0) else round(value / previous * 100, 1),
+            "from_visitors_pct": None if counts["visitors"] == 0 else round(value / counts["visitors"] * 100, 1),
+        })
+        previous = value
+
+    return jsonify({
+        "days": days,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "stages": stages,
+        "sources": [{"source": k, "visitors": v} for k, v in sorted(source_counts.items(), key=lambda x: (-x[1], x[0]))],
+    })
+
+
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 @app.route("/api/move/status")
@@ -358,6 +455,7 @@ def save_move():
     move_date_raw = str(data.get("move_date") or "").strip()
     consent = data.get("consent") is True
     source_path = str(data.get("source_path") or "")[:200]
+    session_key = str(data.get("session") or "")[:80]
 
     if not EMAIL_RE.match(email) or len(email) > 254:
         return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
@@ -413,7 +511,7 @@ def save_move():
     conn.commit()
     conn.close()
     try:
-        record_event("move_saved", source_path, "", {"stage":"lead_capture"})
+        record_event("move_saved", source_path, session_key, {"stage":"lead_capture"})
     except Exception:
         pass
     return jsonify({"ok": True, "move_date": move_date_raw})
