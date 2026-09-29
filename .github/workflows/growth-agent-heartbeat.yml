@@ -1,0 +1,24 @@
+name: HomeFirst90 Growth Agent Heartbeat
+
+on:
+  schedule:
+    - cron: "30 8 * * 1,3,5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate next guarded Growth Agent draft
+        env:
+          HF90_GROWTH_REVIEW_KEY: ${{ secrets.HF90_GROWTH_REVIEW_KEY }}
+        run: |
+          if [ -z "$HF90_GROWTH_REVIEW_KEY" ]; then
+            echo "HF90_GROWTH_REVIEW_KEY repository secret is not configured."
+            exit 1
+          fi
+          response=$(curl --fail-with-body --silent --show-error             -X POST             -H "Content-Type: application/json"             -H "X-Growth-Key: $HF90_GROWTH_REVIEW_KEY"             "https://homefirst90-api.onrender.com/api/growth-agent/generate?auto=1")
+          echo "$response"
