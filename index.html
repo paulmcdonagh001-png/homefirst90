@@ -185,7 +185,7 @@ function build(){
   const owned=own.has(x[1])||auto;
   rows.push({id:i,room:x[0],name:x[1],unit:Math.round(x[2]*factor),qty,stage:x[3],priority:x[4],owned,cost:owned?0:Math.round(x[2]*factor)*qty});
  });
- profile={bedrooms:b,adults:a,children:c,wfh:w,budget:+q("#budget").value||0,buffer:+q("#buffer").value||0};
+ profile={bedrooms:b,adults:a,children:c,wfh:w,budget:+q("#budget").value||0,buffer:+q("#buffer").value||0,used:u,tier:t,furnishing:f};
 }
 function totals(stage){return rows.filter(r=>!stage||r.stage===stage).reduce((s,r)=>s+r.cost,0)}
 function render(){
