@@ -83,7 +83,7 @@ if(moveProfile&&moveProfile.date){
  const label=days>1?days+" days until moving day":days===1?"Moving tomorrow":days===0?"Moving day is today":Math.abs(days)+" days since moving day";
  document.querySelector("#countdown").textContent=label;
  document.querySelector("#moveReadiness").textContent=(moveProfile.postActionCount||0)+" personalised post-move actions are already mapped from the household details you entered.";
- document.querySelector("#completeText").textContent=(moveProfile.postActionCount||0)+" personalised actions are ready from moving day through day 90. Complete will turn them into a live plan with progress, reminders, purchase tracking, sharing and “what should I do next?”.";
+ document.querySelector("#completeText").textContent=(moveProfile.postActionCount||0)+" personalised actions are ready from moving day through day 90. Complete will turn them into a live plan with progress tracking, purchase tracking, sharing and “what should I do next?”.";
  if(days<=7&&days>=0)document.querySelector("#completeTitle").textContent="Moving day is close. Your post-move plan is ready.";
  if(days<0)document.querySelector("#completeTitle").textContent="You’ve moved in. This is where HomeFirst90 Complete takes over.";
 }else{
