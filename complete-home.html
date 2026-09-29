@@ -89,7 +89,7 @@ function render(){
    HF90Visuals.ring("#purchasesRing",purchasePct,{label:"Purchases bought",display:bought+" / "+missing.length});
    HF90Visuals.ring("#spendRing",spendPct,{label:"Recorded spend vs plan",display:Math.round(spendPct)+"%",color:spendPct>100?"#a56a5d":"#153f33"});
  }
- document.querySelector("#progressNote").textContent="Home progress combines completed post-move tasks and planned purchases marked bought. Spend compares prices you have entered with the original setup plan.";
+ const taskLeft=all.length-done,purchaseLeft=outstanding;document.querySelector("#progressNote").innerHTML='<b>'+overallPct+'% of the tracked setup is complete.</b> '+taskLeft+' task'+(taskLeft===1?'':'s')+' and '+purchaseLeft+' planned purchase'+(purchaseLeft===1?'':'s')+' remain. Home progress combines completed post-move tasks and purchases marked bought.';
  let candidates=all.filter(x=>!tasks[x.id]);
  if(day!==null&&day>=0)candidates.sort((a,b)=>Math.abs(a.end-day)-Math.abs(b.end-day));
  document.querySelector("#next").innerHTML=(candidates.slice(0,4).map(x=>'<div class="item"><small>'+x.phase+'</small><b>'+x.text+'</b></div>').join("")||'<div class="item"><b>You’re up to date.</b></div>');
