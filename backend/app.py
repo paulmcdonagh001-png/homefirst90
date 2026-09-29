@@ -12,6 +12,8 @@ ALLOWED_ORIGINS = {
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/homefirst90.db")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+REMINDER_RUN_TOKEN = os.getenv("REMINDER_RUN_TOKEN", "")
 
 def is_postgres():
     return DATABASE_URL.startswith("postgres")
@@ -342,6 +344,21 @@ def move_unsubscribe(token):
     if not changed:
         return ("This unsubscribe link is no longer valid.", 404)
     return ("You have been unsubscribed from HomeFirst90 move-date emails. You can close this page.", 200, {"Content-Type":"text/plain; charset=utf-8"})
+
+@app.route("/api/internal/run-move-reminders", methods=["POST"])
+def run_move_reminders():
+    supplied = request.headers.get("X-Reminder-Token", "")
+    if not REMINDER_RUN_TOKEN or not hmac.compare_digest(supplied, REMINDER_RUN_TOKEN):
+        return jsonify({"ok": False, "error": "unauthorised"}), 401
+    if not RESEND_API_KEY:
+        return jsonify({"ok": False, "error": "email sending not configured"}), 503
+    try:
+        from send_move_reminders import run_reminders
+        result = run_reminders(DATABASE_URL, RESEND_API_KEY)
+        return jsonify({"ok": True, **result})
+    except Exception as e:
+        print("HF90_REMINDER_RUN_ERROR", type(e).__name__, str(e)[:300], flush=True)
+        return jsonify({"ok": False, "error": "reminder run failed"}), 500
 
 @app.route("/webhooks/stripe", methods=["POST"])
 def stripe_webhook():
