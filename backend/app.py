@@ -506,7 +506,7 @@ def record_event(event_type, path="", session_key="", metadata=None):
     metadata = metadata if isinstance(metadata, dict) else {}
     safe_meta = {}
     for k, v in metadata.items():
-        if k in ("source","tool","stage","referrer_kind") and isinstance(v, (str, int, float, bool)):
+        if k in ("source","campaign","tool","stage","referrer_kind") and isinstance(v, (str, int, float, bool)):
             safe_meta[k] = v
     raw = json.dumps(safe_meta)
     conn = db()
@@ -865,6 +865,31 @@ def generate_growth_draft():
     conn.close()
     return draft_id
 
+def automatic_growth_generation():
+    conn=db()
+    cur=conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM hf90_growth_drafts WHERE status='draft'")
+    pending=int(cur.fetchone()[0])
+    cur.execute("SELECT created_at FROM hf90_growth_drafts ORDER BY id DESC LIMIT 1")
+    latest=cur.fetchone()
+    conn.close()
+    if pending >= 3:
+        return {"ok":True,"generated":False,"reason":"approval_queue_full","pending":pending}
+    if latest and latest[0]:
+        try:
+            last=latest[0]
+            if isinstance(last,str):
+                last=datetime.fromisoformat(last.replace("Z","+00:00"))
+            if last.tzinfo is None:
+                last=last.replace(tzinfo=timezone.utc)
+            hours=(datetime.now(timezone.utc)-last.astimezone(timezone.utc)).total_seconds()/3600
+            if hours < 20:
+                return {"ok":True,"generated":False,"reason":"recent_draft_exists","pending":pending}
+        except Exception:
+            pass
+    draft_id=generate_growth_draft()
+    return {"ok":True,"generated":True,"id":draft_id,"pending_before":pending}
+
 def _growth_authorised():
     key = request.headers.get("X-Growth-Key", "")
     return bool(GROWTH_REVIEW_KEY and hmac.compare_digest(key, GROWTH_REVIEW_KEY))
@@ -911,11 +936,103 @@ def growth_agent_generate():
     if not _growth_authorised():
         return jsonify({"ok":False,"error":"unauthorised"}),401
     try:
+        if request.args.get("auto") == "1":
+            return jsonify(automatic_growth_generation())
         draft_id=generate_growth_draft()
         return jsonify({"ok":True,"id":draft_id})
     except Exception as e:
         print("HF90_GROWTH_GENERATE_ERROR",type(e).__name__,str(e)[:300],flush=True)
         return jsonify({"ok":False,"error":"could not generate draft"}),500
+
+@app.route("/api/growth-agent/performance")
+def growth_agent_performance():
+    if not _growth_authorised():
+        return jsonify({"ok":False,"error":"unauthorised"}),401
+    try:
+        days=max(1,min(int(request.args.get("days","30")),365))
+    except Exception:
+        days=30
+    cutoff=datetime.now(timezone.utc)-timedelta(days=days)
+    conn=db();cur=conn.cursor()
+    if is_postgres():
+        cur.execute("""
+          SELECT event_type,path,session_key,metadata_json,created_at
+          FROM hf90_events WHERE created_at >= %s ORDER BY created_at ASC
+        """,(cutoff,))
+    else:
+        cur.execute("""
+          SELECT event_type,path,session_key,metadata_json,created_at
+          FROM hf90_events WHERE created_at >= ? ORDER BY created_at ASC
+        """,(cutoff.isoformat(),))
+    rows=cur.fetchall()
+    cur.execute("SELECT status,COUNT(*) FROM hf90_growth_drafts GROUP BY status")
+    qrows=cur.fetchall()
+    conn.close()
+
+    attribution={}
+    parsed=[]
+    for row in rows:
+        event_type,path,session_key,metadata=row[0],row[1] or "",row[2] or "",row[3]
+        if isinstance(metadata,str):
+            try: metadata=json.loads(metadata)
+            except Exception: metadata={}
+        if not isinstance(metadata,dict): metadata={}
+        source=str(metadata.get("source") or "")
+        campaign=str(metadata.get("campaign") or "")
+        if session_key and session_key!="startup-test":
+            if session_key not in attribution:
+                attribution[session_key]={"source":source or "unknown","campaign":campaign}
+            else:
+                if source and attribution[session_key]["source"] in ("","unknown","internal"):
+                    attribution[session_key]["source"]=source
+                if campaign and not attribution[session_key]["campaign"]:
+                    attribution[session_key]["campaign"]=campaign
+        parsed.append((event_type,path,session_key,metadata))
+
+    def blank():
+        return {"visitors":0,"tool_starts":0,"tool_completions":0,"homes_saved":0,
+                "emails_captured":0,"complete_views":0,"checkout_starts":0,"purchases":0}
+
+    source_stats={}
+    campaign_stats={}
+    visitor_seen_source={}
+    visitor_seen_campaign={}
+    for event_type,path,session_key,metadata in parsed:
+        if not session_key or session_key=="startup-test":
+            continue
+        a=attribution.get(session_key,{"source":"unknown","campaign":""})
+        src=a["source"] or "unknown"; camp=a["campaign"] or ""
+        ss=source_stats.setdefault(src,blank())
+        cs=campaign_stats.setdefault(camp,blank()) if camp else None
+        if session_key not in visitor_seen_source.setdefault(src,set()):
+            visitor_seen_source[src].add(session_key);ss["visitors"]+=1
+        if camp and session_key not in visitor_seen_campaign.setdefault(camp,set()):
+            visitor_seen_campaign[camp].add(session_key);cs["visitors"]+=1
+        field=None
+        if event_type=="tool_run": field="tool_starts"
+        elif event_type=="tool_complete": field="tool_completions"
+        elif event_type=="home_saved": field="homes_saved"
+        elif event_type=="move_saved": field="emails_captured"
+        elif event_type=="page_view" and path in ("/complete.html","/complete"): field="complete_views"
+        elif event_type=="complete_checkout_click": field="checkout_starts"
+        elif event_type=="purchase_confirmed": field="purchases"
+        if field:
+            ss[field]+=1
+            if cs is not None: cs[field]+=1
+
+    def decorate(name,stats,key):
+        v=stats["visitors"]
+        return {key:name,**stats,
+          "tool_completion_per_visitor_pct":None if not v else round(stats["tool_completions"]/v*100,1),
+          "capture_per_visitor_pct":None if not v else round(stats["emails_captured"]/v*100,1),
+          "checkout_per_visitor_pct":None if not v else round(stats["checkout_starts"]/v*100,1)}
+
+    sources=[decorate(k,v,"source") for k,v in source_stats.items()]
+    sources.sort(key=lambda x:(-x["tool_completions"],-x["visitors"],x["source"]))
+    campaigns=[decorate(k,v,"campaign") for k,v in campaign_stats.items()]
+    campaigns.sort(key=lambda x:(-x["tool_completions"],-x["visitors"],x["campaign"]))
+    queue={str(r[0]):int(r[1]) for r in qrows}
+    return jsonify({"ok":True,"days":days,"sources":sources,"campaigns":campaigns,"queue":queue})
 
 @app.route("/api/growth-agent/visual/<int:draft_id>")
 def growth_agent_visual(draft_id):
