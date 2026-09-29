@@ -21,7 +21,7 @@
           <label style="font-size:13px;font-weight:800">Moving date<input name="move_date" type="date" required value="${savedMoveDate()}" style="display:block;width:100%;margin-top:5px;padding:10px;border:1px solid #bdc9c3;border-radius:10px"></label>
           <button type="submit" style="border:0;background:#153f33;color:white;border-radius:10px;padding:12px 15px;font-weight:900;cursor:pointer">Save my move</button>
           <input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px">
-          <label style="grid-column:1/-1;font-size:12px;color:#61706a"><input name="consent" type="checkbox" required style="margin-right:6px">Email me these move-date reminders. I can unsubscribe at any time.</label>
+          <label style="grid-column:1/-1;font-size:12px;color:#61706a"><input name="consent" type="checkbox" required style="margin-right:6px">Email me three move-date reminders with practical moving tips and relevant HomeFirst90 product information. I can unsubscribe at any time.</label>
           <div id="hf90-move-msg" style="grid-column:1/-1;font-size:13px;font-weight:700"></div>
         </form>
       </div>`;
