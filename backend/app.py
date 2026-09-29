@@ -14,6 +14,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/homefirst90.db")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 REMINDER_RUN_TOKEN = os.getenv("REMINDER_RUN_TOKEN", "")
+MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() == "true"
 
 def is_postgres():
     return DATABASE_URL.startswith("postgres")
@@ -255,10 +256,16 @@ def analytics_event():
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
+@app.route("/api/move/status")
+def move_status():
+    return jsonify({"enabled": bool(MOVE_REMINDERS_ENABLED and RESEND_API_KEY)})
+
 @app.route("/api/save-move", methods=["POST", "OPTIONS"])
 def save_move():
     if request.method == "OPTIONS":
         return ("", 204)
+    if not MOVE_REMINDERS_ENABLED or not RESEND_API_KEY:
+        return jsonify({"ok": False, "error": "Move reminders are not available yet."}), 503
     data = request.get_json(silent=True) or {}
     # Honeypot field: normal users never fill this.
     if str(data.get("website") or "").strip():
