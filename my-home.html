@@ -49,7 +49,7 @@
 <h2>Your planning progress</h2>
 <p class="muted">This only counts planning steps you have actually completed on this device — no made-up readiness score.</p>
 <div style="display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:center;margin-top:14px" class="hf90-plan-progress"><div class="hf90-ring-card" id="planningRing"></div><div id="planningStatuses" class="hf90-status-grid"></div></div>
-<div id="nextPlanningStep" class="hf90-highlight-number"><span>Next best planning step</span><b>—</b></div>
+<div id="nextPlanningStep" class="hf90-highlight-number"><span>Next best planning step</span><b>—</b></div><div id="planningMilestone" class="hf90-milestone-message"></div><div class="hf90-result-actions"><button class="hf90-result-action" type="button" onclick="window.print()">Print / save My Home snapshot</button></div>
 </section>
 
 <section class="wide">
@@ -81,6 +81,9 @@ if(window.HF90Visuals)HF90Visuals.ring("#planningRing",planningPct,{label:"Plann
 document.querySelector("#planningStatuses").innerHTML=planningSteps.map(x=>'<a href="'+x.link+'" class="hf90-status '+(x.done?'done':'todo')+'" style="text-decoration:none;color:inherit"><b>'+(x.done?'✓ ':'○ ')+x.name+'</b><span>'+(x.done?'Done':'Still to do')+'</span></a>').join("");
 const nextStep=planningSteps.find(x=>!x.done),nextBox=document.querySelector("#nextPlanningStep");
 if(nextStep)nextBox.innerHTML='<span>Next best planning step</span><b><a href="'+nextStep.link+'" style="color:#153f33;text-decoration:none">'+nextStep.name+' →</a></b>';else nextBox.innerHTML='<span>Free planning</span><b>All 4 planning steps complete ✓</b>';
+const milestoneBox=document.querySelector("#planningMilestone");
+const milestoneCopy=completedPlanning===0?["Start with one useful number","Complete any free calculator and My Home will start building your planning snapshot."]:completedPlanning===1?["1 of 4 planning steps complete","Good start. Add the next number so your move stops relying on guesses."]:completedPlanning===2?["Halfway through the free planning","You have two of the four core planning pieces saved."]:completedPlanning===3?["One planning step left","Finish the final free step and your pre-move snapshot is complete."]:["Free planning complete ✓","Your core numbers and move date are now together. From moving day, Complete is designed to take over the live organising."];
+milestoneBox.innerHTML='<b>'+milestoneCopy[0]+'</b><span>'+milestoneCopy[1]+'</span>';
 
 if(home&&Array.isArray(home.rows)){
  const total=home.rows.reduce((s,r)=>s+(r.cost||0),0);
