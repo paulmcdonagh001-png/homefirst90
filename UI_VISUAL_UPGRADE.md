@@ -72,9 +72,9 @@ Purpose: make HomeFirst90 easier to understand at a glance, more engaging on mob
 
 ### High-value next
 - [x] Next-best-step card on My Home
-- [ ] Add small contextual milestone messages when a user completes all four free planning steps
+- [x] Add contextual milestone messages as free planning progresses
 - [ ] Create shareable result cards for selected free tools, designed to encourage organic referrals without exposing private data
-- [ ] Add a simple Print / Save summary option to the major planning tools
+- [x] Add a simple Print / Save summary option to the major planning tools and My Home
 - [ ] Add lightweight expand/collapse for long detailed breakdowns on small screens
 - [ ] Consider an optional "What changed?" comparison when a saved budget is recalculated
 - [ ] Add a small "You have planned £X / identified Y items / mapped Z actions" summary on My Home once enough data exists
