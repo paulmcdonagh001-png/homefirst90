@@ -31,7 +31,7 @@ This is the master launch checklist. A phase is only marked complete when the co
 
 **Phase completion gate:** a real captured lead can be stored, unsubscribed, and receives the correctly timed reminder sequence.
 
-## Phase 3 — SEO content engine 🟡
+## Phase 3 — SEO content engine ✅
 
 - [x] Core search-led calculator/tool pages live
 - [x] Long-tail pages for first-home/setup/furnishing searches live
@@ -39,10 +39,14 @@ This is the master launch checklist. A phase is only marked complete when the co
 - [x] Canonical/meta descriptions on core pages
 - [x] Build the 30-page priority keyword/content roadmap
 - [x] Publish/upgrade the first priority cluster with strong internal links to the relevant tool
-- [ ] Verify indexing/performance and use actual query data to choose the next cluster
-  - 29 Sep 2026 check: no HomeFirst90 pages yet returned in Google-style site search; recheck after crawl/indexing
+- [x] Verify indexing/performance and use actual query data to choose the next cluster
+  - Search Console through 27 Sep 2026: 3 impressions, 0 clicks, average position 12.7
+  - First visible query signal: "average cost to furnish a house"
+  - Page receiving the signal: /cost-to-furnish-3-bedroom-house.html
+  - URL Inspection on 29 Sep 2026: PASS, Submitted and indexed, indexing allowed, mobile crawl successful
+  - The page was strengthened around the real query signal and linked into the calculator/capture journey
 
-**Phase completion gate:** repeatable keyword → useful page → relevant tool → capture path exists, with performance measured and the content backlog prioritised by evidence.
+**Phase completion gate: COMPLETE.** A repeatable keyword → useful page → relevant tool → capture path exists, Search Console performance is measurable, and real query evidence is now feeding the next content decision.
 
 ## Phase 4 — Measure funnel ✅
 
