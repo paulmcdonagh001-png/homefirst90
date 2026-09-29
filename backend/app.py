@@ -134,6 +134,18 @@ def init_db():
         )
         """)
         cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_tester_applications (
+            id BIGSERIAL PRIMARY KEY,
+            name TEXT,
+            email TEXT UNIQUE NOT NULL,
+            mover_stage TEXT,
+            move_date DATE,
+            consent BOOLEAN NOT NULL DEFAULT TRUE,
+            entitlement_session_id TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """)
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
             name TEXT,
@@ -198,6 +210,18 @@ def init_db():
             run_date TEXT NOT NULL,
             created_at TEXT NOT NULL,
             PRIMARY KEY(job_name,run_date)
+        )
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_tester_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT UNIQUE NOT NULL,
+            mover_stage TEXT,
+            move_date TEXT,
+            consent INTEGER NOT NULL DEFAULT 1,
+            entitlement_session_id TEXT,
+            created_at TEXT NOT NULL
         )
         """)
         cur.execute("""
@@ -327,7 +351,7 @@ ALLOWED_EVENTS = {
     "page_view","tool_run","tool_complete","home_saved",
     "complete_checkout_click","checkout_return",
     "purchase_confirmed","complete_open","complete_access_restored","move_saved",
-    "feedback_submitted","tester_access_granted"
+    "feedback_submitted","tester_access_granted","tester_application"
 }
 
 def record_event(event_type, path="", session_key="", metadata=None):
@@ -482,12 +506,15 @@ def tester_status():
     else:
         cur.execute("SELECT COUNT(*), COALESCE(SUM(CASE WHEN permission_to_quote=1 THEN 1 ELSE 0 END),0) FROM hf90_feedback")
     fb = cur.fetchone()
+    cur.execute("SELECT COUNT(*) FROM hf90_tester_applications")
+    applications = int(cur.fetchone()[0])
     conn.close()
     return jsonify({
-        "enabled": bool(TESTER_INVITE_CODE),
+        "enabled": True,
         "limit": TESTER_LIMIT,
         "used": used,
         "remaining": max(0, TESTER_LIMIT - used),
+        "applications": applications,
         "feedback_received": int(fb[0]),
         "quotable_feedback": int(fb[1]),
     })
@@ -508,7 +535,6 @@ def feedback_review():
         LIMIT 200
     """)
     rows = cur.fetchall()
-    conn.close()
     items = []
     for row in rows:
         items.append({
@@ -524,7 +550,142 @@ def feedback_review():
             "permission_to_quote": bool(row[9]),
             "created_at": str(row[10]),
         })
-    return jsonify({"ok": True, "count": len(items), "items": items})
+    if is_postgres():
+        cur.execute("""
+            SELECT name,email,mover_stage,move_date,created_at
+            FROM hf90_tester_applications
+            ORDER BY created_at DESC
+            LIMIT 200
+        """)
+    else:
+        cur.execute("""
+            SELECT name,email,mover_stage,move_date,created_at
+            FROM hf90_tester_applications
+            ORDER BY created_at DESC
+            LIMIT 200
+        """)
+    app_rows = cur.fetchall()
+    conn.close()
+    applications = [{
+        "name": r[0] or "",
+        "email": r[1] or "",
+        "mover_stage": r[2] or "",
+        "move_date": str(r[3] or ""),
+        "created_at": str(r[4]),
+    } for r in app_rows]
+    return jsonify({"ok": True, "count": len(items), "applications": applications, "items": items})
+
+
+@app.route("/api/tester-apply", methods=["POST", "OPTIONS"])
+def tester_apply():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    data = request.get_json(silent=True) or {}
+    if str(data.get("website") or "").strip():
+        return jsonify({"ok": True}), 200
+
+    name = str(data.get("name") or "").strip()[:100]
+    email = str(data.get("email") or "").strip().lower()[:254]
+    mover_stage = str(data.get("mover_stage") or "").strip()[:40]
+    move_date_raw = str(data.get("move_date") or "").strip()
+    consent = data.get("consent") is True
+
+    if not EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
+    if mover_stage not in ("moving_soon","planning","just_moved"):
+        return jsonify({"ok": False, "error": "Please choose where you are in your move."}), 400
+    if not consent:
+        return jsonify({"ok": False, "error": "Please confirm the tester terms."}), 400
+
+    move_date = None
+    if move_date_raw:
+        try:
+            move_date = date.fromisoformat(move_date_raw)
+        except Exception:
+            return jsonify({"ok": False, "error": "Please enter a valid moving date."}), 400
+
+    conn = db()
+    cur = conn.cursor()
+
+    # Returning applicant: restore the same tester access if it already exists.
+    if is_postgres():
+        cur.execute("SELECT entitlement_session_id FROM hf90_tester_applications WHERE email=%s LIMIT 1", (email,))
+    else:
+        cur.execute("SELECT entitlement_session_id FROM hf90_tester_applications WHERE email=? LIMIT 1", (email,))
+    existing_app = cur.fetchone()
+    if existing_app and existing_app[0]:
+        sid = existing_app[0]
+        if is_postgres():
+            cur.execute("SELECT access_key,active FROM hf90_entitlements WHERE session_id=%s LIMIT 1", (sid,))
+        else:
+            cur.execute("SELECT access_key,active FROM hf90_entitlements WHERE session_id=? LIMIT 1", (sid,))
+        ent = cur.fetchone()
+        if ent:
+            if not bool(ent[1]):
+                if is_postgres():
+                    cur.execute("UPDATE hf90_entitlements SET active=TRUE,updated_at=NOW() WHERE session_id=%s", (sid,))
+                else:
+                    cur.execute("UPDATE hf90_entitlements SET active=1,updated_at=? WHERE session_id=?", (datetime.now(timezone.utc).isoformat(), sid))
+                conn.commit()
+            conn.close()
+            return jsonify({"ok": True, "access_key": ent[0], "existing": True})
+
+    if is_postgres():
+        cur.execute("LOCK TABLE hf90_entitlements IN EXCLUSIVE MODE")
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=%s", ("tester",))
+    else:
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=?", ("tester",))
+    used = int(cur.fetchone()[0])
+    if used >= TESTER_LIMIT:
+        conn.close()
+        return jsonify({"ok": False, "error": "The Founding Tester places are now full."}), 409
+
+    session_id = "tester_" + hashlib.sha256(email.encode()).hexdigest()[:24]
+    access_key = "hf90_" + secrets.token_urlsafe(28)
+    now = datetime.now(timezone.utc).isoformat()
+
+    if is_postgres():
+        cur.execute("""
+            INSERT INTO hf90_entitlements
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (%s,%s,%s,NULL,%s,TRUE,'{}'::jsonb,NOW(),NOW())
+            ON CONFLICT (session_id) DO UPDATE SET active=TRUE,updated_at=NOW()
+            RETURNING access_key
+        """, (session_id,email,"tester",access_key))
+        access_key = cur.fetchone()[0]
+        cur.execute("""
+            INSERT INTO hf90_tester_applications
+              (name,email,mover_stage,move_date,consent,entitlement_session_id,created_at)
+            VALUES (%s,%s,%s,%s,TRUE,%s,NOW())
+            ON CONFLICT (email) DO UPDATE SET
+              name=EXCLUDED.name,mover_stage=EXCLUDED.mover_stage,move_date=EXCLUDED.move_date,
+              consent=TRUE,entitlement_session_id=EXCLUDED.entitlement_session_id
+        """, (name,email,mover_stage,move_date,session_id))
+    else:
+        cur.execute("""
+            INSERT OR IGNORE INTO hf90_entitlements
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (?,?,?,NULL,?,1,'{}',?,?)
+        """, (session_id,email,"tester",access_key,now,now))
+        cur.execute("SELECT access_key FROM hf90_entitlements WHERE session_id=?", (session_id,))
+        access_key = cur.fetchone()[0]
+        cur.execute("""
+            INSERT INTO hf90_tester_applications
+              (name,email,mover_stage,move_date,consent,entitlement_session_id,created_at)
+            VALUES (?,?,?,?,1,?,?)
+            ON CONFLICT(email) DO UPDATE SET
+              name=excluded.name,mover_stage=excluded.mover_stage,move_date=excluded.move_date,
+              consent=1,entitlement_session_id=excluded.entitlement_session_id
+        """, (name,email,mover_stage,move_date_raw or None,session_id,now))
+
+    conn.commit()
+    conn.close()
+    try:
+        record_event("tester_application", "/founding-testers.html", "", {"stage":"tester"})
+        record_event("tester_access_granted", "/founding-testers.html", "", {"stage":"tester"})
+    except Exception:
+        pass
+    return jsonify({"ok": True, "access_key": access_key, "existing": False})
 
 
 @app.route("/api/tester-access", methods=["POST", "OPTIONS"])
