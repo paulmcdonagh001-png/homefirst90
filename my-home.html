@@ -49,6 +49,7 @@
 <h2>Your planning progress</h2>
 <p class="muted">This only counts planning steps you have actually completed on this device — no made-up readiness score.</p>
 <div style="display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:center;margin-top:14px" class="hf90-plan-progress"><div class="hf90-ring-card" id="planningRing"></div><div id="planningStatuses" class="hf90-status-grid"></div></div>
+<div id="nextPlanningStep" class="hf90-highlight-number"><span>Next best planning step</span><b>—</b></div>
 </section>
 
 <section class="wide">
@@ -78,6 +79,8 @@ const planningSteps=[
 const completedPlanning=planningSteps.filter(x=>x.done).length,planningPct=Math.round(completedPlanning/planningSteps.length*100);
 if(window.HF90Visuals)HF90Visuals.ring("#planningRing",planningPct,{label:"Planning complete",display:planningPct+"%"});
 document.querySelector("#planningStatuses").innerHTML=planningSteps.map(x=>'<a href="'+x.link+'" class="hf90-status '+(x.done?'done':'todo')+'" style="text-decoration:none;color:inherit"><b>'+(x.done?'✓ ':'○ ')+x.name+'</b><span>'+(x.done?'Done':'Still to do')+'</span></a>').join("");
+const nextStep=planningSteps.find(x=>!x.done),nextBox=document.querySelector("#nextPlanningStep");
+if(nextStep)nextBox.innerHTML='<span>Next best planning step</span><b><a href="'+nextStep.link+'" style="color:#153f33;text-decoration:none">'+nextStep.name+' →</a></b>';else nextBox.innerHTML='<span>Free planning</span><b>All 4 planning steps complete ✓</b>';
 
 if(home&&Array.isArray(home.rows)){
  const total=home.rows.reduce((s,r)=>s+(r.cost||0),0);
