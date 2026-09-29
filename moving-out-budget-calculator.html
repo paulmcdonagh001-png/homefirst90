@@ -67,7 +67,7 @@ function calc(save=false){
  document.querySelector("#breakdown").innerHTML=[
  ["Your share of tenancy deposit",myDeposit],["Your share of rent before move-in",myAdvance],["Moving / van",myMoving],["Home setup",mySetup],["Other upfront costs",myOther]
  ].map(x=>'<div class="line"><span>'+x[0]+'</span><b>'+money(x[1])+'</b></div>').join("");
- const moveSegments=[{label:"Deposit",value:myDeposit},{label:"Rent before move-in",value:myAdvance},{label:"Moving / van",value:myMoving},{label:"Home setup",value:mySetup},{label:"Other upfront",value:myOther},{label:"Emergency reserve",value:res}];
+ const moveSegments=[{label:"Deposit",value:myDeposit},{label:"Rent upfront",value:myAdvance},{label:"Moving",value:myMoving},{label:"Home setup",value:mySetup},{label:"Other",value:myOther},{label:"Emergency reserve",value:res}];
  if(window.HF90Visuals)HF90Visuals.donut("#moveChart",moveSegments,{centerValue:money(total),centerLabel:"Move-out cash"});
  const moveTop=[...moveSegments].sort((a,b)=>b.value-a.value).slice(0,3),moveTopTotal=moveTop.reduce((s,x)=>s+x.value,0),movePct=total?Math.round(moveTopTotal/total*100):0;
  document.querySelector("#moveInsight").innerHTML=total?'<b>Your three biggest move-out costs make up '+movePct+'% of this total.</b> The reserve is deliberately kept visible because it is money you want left after moving, not something to spend.':'Add your figures to see what is driving the total.';
