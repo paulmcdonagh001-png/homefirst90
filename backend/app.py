@@ -1,5 +1,6 @@
 import os, json, hmac, hashlib, time, secrets, sqlite3, re
 from datetime import datetime, timezone, date
+from zoneinfo import ZoneInfo
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -13,7 +14,6 @@ WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/homefirst90.db")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-REMINDER_RUN_TOKEN = os.getenv("REMINDER_RUN_TOKEN", "")
 MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() == "true"
 
 def is_postgres():
@@ -53,6 +53,14 @@ def init_db():
             session_key TEXT,
             metadata_json JSONB NOT NULL DEFAULT '{}'::jsonb,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_job_runs (
+            job_name TEXT NOT NULL,
+            run_date DATE NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            PRIMARY KEY(job_name,run_date)
         )
         """)
         cur.execute("""
@@ -97,6 +105,14 @@ def init_db():
             session_key TEXT,
             metadata_json TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL
+        )
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_job_runs (
+            job_name TEXT NOT NULL,
+            run_date TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY(job_name,run_date)
         )
         """)
         cur.execute("""
@@ -354,16 +370,49 @@ def move_unsubscribe(token):
 
 @app.route("/api/internal/run-move-reminders", methods=["POST"])
 def run_move_reminders():
-    supplied = request.headers.get("X-Reminder-Token", "")
-    if not REMINDER_RUN_TOKEN or not hmac.compare_digest(supplied, REMINDER_RUN_TOKEN):
-        return jsonify({"ok": False, "error": "unauthorised"}), 401
-    if not RESEND_API_KEY:
+    if not MOVE_REMINDERS_ENABLED or not RESEND_API_KEY:
         return jsonify({"ok": False, "error": "email sending not configured"}), 503
+
+    now_uk = datetime.now(ZoneInfo("Europe/London"))
+    if now_uk.hour < 7 or now_uk.hour > 11:
+        return jsonify({"ok": False, "error": "outside send window"}), 403
+
+    today = now_uk.date()
+    conn = db()
+    cur = conn.cursor()
+    try:
+        if is_postgres():
+            cur.execute("""
+                INSERT INTO hf90_job_runs(job_name,run_date,created_at)
+                VALUES (%s,%s,NOW())
+                ON CONFLICT (job_name,run_date) DO NOTHING
+            """, ("move-reminders", today))
+        else:
+            cur.execute("""
+                INSERT OR IGNORE INTO hf90_job_runs(job_name,run_date,created_at)
+                VALUES (?,?,?)
+            """, ("move-reminders", today.isoformat(), datetime.now(timezone.utc).isoformat()))
+        inserted = cur.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+
+    if not inserted:
+        return jsonify({"ok": True, "already_ran": True, "date": today.isoformat(), "sent": 0})
+
     try:
         from send_move_reminders import run_reminders
         result = run_reminders(DATABASE_URL, RESEND_API_KEY)
         return jsonify({"ok": True, **result})
     except Exception as e:
+        conn = db()
+        cur = conn.cursor()
+        if is_postgres():
+            cur.execute("DELETE FROM hf90_job_runs WHERE job_name=%s AND run_date=%s", ("move-reminders", today))
+        else:
+            cur.execute("DELETE FROM hf90_job_runs WHERE job_name=? AND run_date=?", ("move-reminders", today.isoformat()))
+        conn.commit()
+        conn.close()
         print("HF90_REMINDER_RUN_ERROR", type(e).__name__, str(e)[:300], flush=True)
         return jsonify({"ok": False, "error": "reminder run failed"}), 500
 
