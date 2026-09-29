@@ -8,7 +8,7 @@
 <style>
 :root{--g:#153f33;--g2:#e8f1ed;--m:#61706a;--p:#f5f5f0;--l:#dfe5e1;--s:#f1f5f2;--a:#fff5dc;--ink:#17201d}
 *{box-sizing:border-box}body{margin:0;background:var(--p);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}.w{max-width:1080px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-weight:950;font-size:22px}.brand a{text-decoration:none;color:inherit}.tag{font-size:12px;color:var(--m);font-weight:800}.nav a{color:var(--g);text-decoration:none;font-weight:850;margin-left:12px}.hero{margin-top:18px;background:#101f1a;color:#fff;border-radius:26px;padding:28px}.ey{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:900;color:#c8d8d1}.hero h1{font-size:44px;line-height:1.03;letter-spacing:-.045em;margin:8px 0}.hero p{color:#cad8d2;max-width:760px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.card,.panel{background:#fff;border:1px solid var(--l);border-radius:18px;padding:18px}.card span{display:block;color:var(--m);font-size:12px}.card b{display:block;font-size:25px;margin-top:3px}.panel{margin-top:14px}.panel h2{margin:0 0 5px;font-size:28px;letter-spacing:-.03em}.muted{color:var(--m)}.next{display:grid;gap:8px;margin-top:12px}.next .item{background:var(--s);border-radius:13px;padding:13px}.next small{display:block;color:var(--m);margin-bottom:3px}.phases{display:grid;gap:10px;margin-top:12px}.phase{border:1px solid var(--l);border-radius:14px;overflow:hidden}.ph{background:var(--s);padding:11px 13px;font-weight:900}.task{display:flex;gap:9px;padding:10px 12px;border-top:1px solid var(--l)}.task input{margin-top:4px}.shop{display:grid;gap:8px;margin-top:12px}.shoprow{display:grid;grid-template-columns:1fr 110px 80px;gap:8px;align-items:center;border:1px solid var(--l);border-radius:12px;padding:10px}.shoprow input[type=number]{width:100%;padding:8px;border:1px solid #ccd6d0;border-radius:9px}.shoprow small{color:var(--m);display:block}.access{background:var(--g2);border-radius:14px;padding:14px;margin-top:14px}.code{font-family:ui-monospace,monospace;word-break:break-all;background:#fff;padding:10px;border-radius:9px;margin-top:8px}.login{max-width:600px;margin:80px auto;background:#fff;border:1px solid var(--l);border-radius:22px;padding:26px}.login input{width:100%;padding:12px;border:1px solid #ccd6d0;border-radius:11px}.btn{border:0;background:var(--g);color:#fff;border-radius:11px;padding:12px 14px;font-weight:900;cursor:pointer;margin-top:10px}.hidden{display:none!important}@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}.shoprow{grid-template-columns:1fr}.hero h1{font-size:36px}}@media(max-width:480px){.grid{grid-template-columns:1fr}.w{padding:12px}}
-</style></head>
+</style><link rel="stylesheet" href="/ui-visuals.css"></head>
 <body><main class="w">
 <header class="top"><div><div class="brand"><a href="/">HomeFirst90</a></div><div class="tag">Complete · Plan the move. Own your first 90 days.</div></div><nav class="nav"><a href="/my-home.html">My Home</a><a href="/">Home</a></nav></header>
 
@@ -25,6 +25,7 @@
 <div class="card"><span>Purchases outstanding</span><b id="purchaseCount">—</b></div>
 <div class="card"><span>Actual setup spend</span><b id="actualSpend">—</b></div>
 </section>
+<section class="panel"><h2>Your home at a glance</h2><p class="muted">Live progress from the tasks and purchases you actually tick off.</p><div class="hf90-rings"><div class="hf90-ring-card" id="overallRing"></div><div class="hf90-ring-card" id="tasksRing"></div><div class="hf90-ring-card" id="purchasesRing"></div><div class="hf90-ring-card" id="spendRing"></div></div><div id="progressNote" class="muted" style="font-size:12px"></div></section>
 
 <section class="panel"><h2>What should I do next?</h2><p class="muted">The next useful actions for where you are now.</p><div id="next" class="next"></div></section>
 <section class="panel"><h2>Moving day → Day 90</h2><p class="muted">Tick jobs off as they are completed. Progress is saved to your Complete Home.</p><div id="phases" class="phases"></div></section>
@@ -32,6 +33,7 @@
 <section class="panel"><h2>Share or use another device</h2><p class="muted">This household code opens the same Complete Home on another browser or for a partner/housemate. Treat it like a password.</p><div id="accessCode" class="code"></div></section>
 </div>
 <section style="max-width:1080px;margin:18px auto;padding:0 20px"><div style="background:#edf4f0;border-radius:16px;padding:14px 16px;font-size:14px"><b>Testing HomeFirst90?</b> <a href="/feedback.html" style="color:#153f33;font-weight:900">Send feedback →</a></div></section></main>
+<script src="/ui-visuals.js"></script>
 <script>
 const API="https://homefirst90-api.onrender.com";
 const GBP=n=>new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(n||0);
@@ -75,6 +77,19 @@ function render(){
  const actual=missing.reduce((s,r)=>s+(+(purchases[r.id]||{}).actual||0),0);
  document.querySelector("#purchaseCount").textContent=outstanding;
  document.querySelector("#actualSpend").textContent=GBP(actual);
+ const taskPct=all.length?done/all.length*100:100;
+ const bought=missing.filter(r=>(purchases[r.id]||{}).bought).length;
+ const purchasePct=missing.length?bought/missing.length*100:100;
+ const overallPct=Math.round((taskPct+purchasePct)/2);
+ const planned=missing.reduce((s,r)=>s+(r.cost||0),0);
+ const spendPct=planned?actual/planned*100:0;
+ if(window.HF90Visuals){
+   HF90Visuals.ring("#overallRing",overallPct,{label:"Home progress",display:overallPct+"%"});
+   HF90Visuals.ring("#tasksRing",taskPct,{label:"Tasks completed",display:done+" / "+all.length});
+   HF90Visuals.ring("#purchasesRing",purchasePct,{label:"Purchases bought",display:bought+" / "+missing.length});
+   HF90Visuals.ring("#spendRing",spendPct,{label:"Recorded spend vs plan",display:Math.round(spendPct)+"%",color:spendPct>100?"#a56a5d":"#153f33"});
+ }
+ document.querySelector("#progressNote").textContent="Home progress combines completed post-move tasks and planned purchases marked bought. Spend compares prices you have entered with the original setup plan.";
  let candidates=all.filter(x=>!tasks[x.id]);
  if(day!==null&&day>=0)candidates.sort((a,b)=>Math.abs(a.end-day)-Math.abs(b.end-day));
  document.querySelector("#next").innerHTML=(candidates.slice(0,4).map(x=>'<div class="item"><small>'+x.phase+'</small><b>'+x.text+'</b></div>').join("")||'<div class="item"><b>You’re up to date.</b></div>');
