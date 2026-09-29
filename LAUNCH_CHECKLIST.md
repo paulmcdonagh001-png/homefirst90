@@ -40,6 +40,7 @@ This is the master launch checklist. A phase is only marked complete when the co
 - [x] Build the 30-page priority keyword/content roadmap
 - [x] Publish/upgrade the first priority cluster with strong internal links to the relevant tool
 - [ ] Verify indexing/performance and use actual query data to choose the next cluster
+  - 29 Sep 2026 check: no HomeFirst90 pages yet returned in Google-style site search; recheck after crawl/indexing
 
 **Phase completion gate:** repeatable keyword → useful page → relevant tool → capture path exists, with performance measured and the content backlog prioritised by evidence.
 
