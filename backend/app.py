@@ -1040,6 +1040,81 @@ def growth_agent_performance():
     queue={str(r[0]):int(r[1]) for r in qrows}
     return jsonify({"ok":True,"days":days,"sources":sources,"campaigns":campaigns,"queue":queue})
 
+def _growth_media_sig(draft_id):
+    return hmac.new(GROWTH_REVIEW_KEY.encode(),f"growth-media:{draft_id}".encode(),hashlib.sha256).hexdigest()
+
+@app.route("/api/growth-agent/media-url/<int:draft_id>")
+def growth_agent_media_url(draft_id):
+    if not _growth_authorised():
+        return jsonify({"ok":False,"error":"unauthorised"}),401
+    sig=_growth_media_sig(draft_id)
+    return jsonify({"ok":True,"url":f"https://homefirst90-api.onrender.com/api/growth-agent/media/{draft_id}.png?sig={sig}"})
+
+@app.route("/api/growth-agent/media/<int:draft_id>.png")
+def growth_agent_media(draft_id):
+    sig=str(request.args.get("sig") or "")
+    if not GROWTH_REVIEW_KEY or not hmac.compare_digest(sig,_growth_media_sig(draft_id)):
+        return ("not found",404)
+    conn=db();cur=conn.cursor()
+    if is_postgres():
+        cur.execute("SELECT topic,hook,destination_path FROM hf90_growth_drafts WHERE id=%s",(draft_id,))
+    else:
+        cur.execute("SELECT topic,hook,destination_path FROM hf90_growth_drafts WHERE id=?",(draft_id,))
+    row=cur.fetchone();conn.close()
+    if not row:
+        return ("not found",404)
+
+    from PIL import Image,ImageDraw,ImageFont
+    from io import BytesIO
+    topic=str(row[0] or "HomeFirst90")
+    hook=str(row[1] or "")
+    dest=str(row[2] or "/")
+
+    img=Image.new("RGB",(1080,1350),(245,245,240))
+    d=ImageDraw.Draw(img)
+    green=(21,63,51); white=(255,255,255); pale=(215,229,222); ink=(23,32,29); muted=(97,112,106)
+    d.rounded_rectangle((42,42,1038,1308),radius=48,fill=green)
+
+    def font(size,bold=False):
+        paths=[
+          "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+          "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/dejavu/DejaVuSans.ttf"
+        ]
+        for p in paths:
+            try:return ImageFont.truetype(p,size=size)
+            except Exception:pass
+        return ImageFont.load_default()
+
+    def wrap(text,f,max_width):
+        words=text.split();lines=[];cur=""
+        for word in words:
+            trial=(cur+" "+word).strip()
+            if d.textbbox((0,0),trial,font=f)[2] <= max_width or not cur:
+                cur=trial
+            else:
+                lines.append(cur);cur=word
+        if cur:lines.append(cur)
+        return lines
+
+    d.text((64,80),"HOMEFIRST90",font=font(30,True),fill=pale)
+    d.text((64,145),topic,font=font(34,True),fill=white)
+    y=245
+    hf=font(54,True)
+    for line in wrap(hook,hf,920)[:6]:
+        d.text((64,y),line,font=hf,fill=white);y+=67
+
+    d.rounded_rectangle((64,760,1016,1060),radius=34,fill=white)
+    d.text((104,820),"FREE HOME-MOVING TOOL",font=font(28,True),fill=green)
+    d.text((104,885),"Plan it before you spend it.",font=font(42,True),fill=ink)
+    d.text((104,950),"Budget • bills • setup • what to buy • moving plan",font=font(26),fill=muted)
+    d.rounded_rectangle((104,1115,610,1210),radius=24,fill=white)
+    d.text((142,1146),"homefirst90.com",font=font(30,True),fill=green)
+    d.text((64,1255),dest,font=font(22),fill=pale)
+
+    buf=BytesIO();img.save(buf,format="PNG",optimize=True);buf.seek(0)
+    from flask import send_file
+    return send_file(buf,mimetype="image/png",download_name=f"homefirst90-growth-{draft_id}.png",max_age=3600)
+
 @app.route("/api/growth-agent/visual/<int:draft_id>")
 def growth_agent_visual(draft_id):
     if not _growth_authorised():
