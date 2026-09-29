@@ -164,6 +164,8 @@ def init_db():
             reviewed_at TIMESTAMPTZ
         )
         """)
+        cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN IF NOT EXISTS campaign_key TEXT")
+        cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN IF NOT EXISTS generation_note TEXT")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
@@ -267,6 +269,14 @@ def init_db():
             reviewed_at TEXT
         )
         """)
+        try:
+            cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN campaign_key TEXT")
+        except Exception:
+            pass
+        try:
+            cur.execute("ALTER TABLE hf90_growth_drafts ADD COLUMN generation_note TEXT")
+        except Exception:
+            pass
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -630,6 +640,231 @@ def funnel_summary():
     })
 
 
+HF90_GROWTH_LIBRARY = [
+    {
+        "key":"move_cash_hidden",
+        "topic":"The costs before the keys",
+        "hook":"The deposit is obvious. The awkward bit is everything else that needs paying around it.",
+        "destination":"/moving-out-budget-calculator.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "visual":"Five cost blocks around a key icon: upfront housing, moving, essentials, first bills, emergency cash.",
+        "rationale":"High-intent moving-out budgeting problem with a direct free calculator.",
+        "copy":{
+          "facebook":"Planning to move out? The deposit is only the obvious bit. Add rent upfront, moving costs, basic setup, first bills and the cash you want left afterwards. HomeFirst90's free moving-out calculator pulls the full number together.",
+          "instagram":"Deposit ✓. Rent upfront ✓. Now add moving, setup, first bills and emergency cash. The free HomeFirst90 moving-out calculator helps you see the number before the keys arrive.",
+          "pinterest":"Moving-out budget checklist: deposit, rent upfront, moving costs, setup essentials, first bills and emergency cash. Calculate the full amount free with HomeFirst90.",
+          "youtube":"The deposit isn't the full cost of moving out. Add rent upfront, moving costs, setup essentials, first bills and some emergency cash. HomeFirst90 has a free calculator that works through the whole number."
+        }
+    },
+    {
+        "key":"move_cash_buffer",
+        "topic":"How much cash should be left after moving?",
+        "hook":"If your moving budget leaves you with £0 afterwards, the budget probably isn't finished.",
+        "destination":"/moving-out-budget-calculator.html",
+        "channels":["facebook","instagram","pinterest"],
+        "visual":"A moving budget bar with a clearly protected emergency-cash segment at the end.",
+        "rationale":"Turns emergency cash into a practical budgeting hook rather than another generic moving checklist.",
+        "copy":{
+          "facebook":"One bit people forget when working out a moving budget: what is left afterwards. If the move uses every pound you've got, one broken appliance or unexpected bill becomes a problem. The free HomeFirst90 calculator includes the cash you want to keep back.",
+          "instagram":"A moving budget that ends at £0 isn't really finished. Keep some cash back for the stuff nobody planned for. HomeFirst90's free moving-out calculator includes that buffer.",
+          "pinterest":"Moving-home budget tip: protect an emergency cash buffer before spending the rest on setup. Use HomeFirst90's free moving-out calculator."
+        }
+    },
+    {
+        "key":"bills_living_alone",
+        "topic":"The real cost of living alone",
+        "hook":"Living alone? Rent is only one line of the monthly bill.",
+        "destination":"/household-bills-estimator.html",
+        "channels":["facebook","pinterest","youtube"],
+        "visual":"Monthly cost stack: rent + council tax + energy + water + broadband + smaller recurring costs.",
+        "rationale":"Strong first-flat intent and an immediate reason to use the bills estimator.",
+        "copy":{
+          "facebook":"Living alone for the first time? Don't judge affordability from the rent alone. Council tax, energy, water, broadband and all the smaller recurring costs sit beside it. HomeFirst90's free bills estimator helps you see the monthly total.",
+          "pinterest":"First-flat monthly bills: council tax, energy, water, broadband and recurring household costs. Estimate the real monthly total free with HomeFirst90.",
+          "youtube":"Before you decide whether living alone is affordable, add more than the rent. Council tax, energy, water, broadband and smaller household costs matter too. HomeFirst90 has a free bills estimator."
+        }
+    },
+    {
+        "key":"bills_couple",
+        "topic":"First home together",
+        "hook":"Moving in together? Work out the household total before you decide what 'half each' actually means.",
+        "destination":"/household-bills-estimator.html",
+        "channels":["facebook","instagram","pinterest"],
+        "visual":"Two people feeding into one household-cost stack, with a total at the bottom.",
+        "rationale":"Couples are a natural HomeFirst90 audience and bills are an immediate shared planning problem.",
+        "copy":{
+          "facebook":"Moving in together? Before you split anything 50/50, work out the actual household total: council tax, energy, water, broadband and the rest. HomeFirst90's free bills estimator gives you a number to start from.",
+          "instagram":"First place together? Start with the full household cost, not just the rent. Then decide how you want to split it. Free bills estimator on HomeFirst90.",
+          "pinterest":"Moving in together budget: calculate the full monthly household cost before deciding how to split the bills. Free HomeFirst90 estimator."
+        }
+    },
+    {
+        "key":"setup_1bed",
+        "topic":"Cost to set up a one-bedroom flat",
+        "hook":"A one-bed flat can still swallow a setup budget surprisingly quickly.",
+        "destination":"/new-home-setup-cost.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "visual":"One-bed flat floorplan-style blocks with essential setup categories and a budget meter.",
+        "rationale":"Matches an existing high-intent setup/furnishing search theme and the core setup calculator.",
+        "copy":{
+          "facebook":"Setting up a one-bed flat from scratch? The expensive part isn't one big purchase — it's the pile of smaller ones. Bed, kitchen basics, cleaning, lighting, storage, appliances and the rest. HomeFirst90's free setup calculator helps you total it before you start buying.",
+          "instagram":"One-bed flat. One setup budget. A lot more little purchases than you expect. Use the free HomeFirst90 setup calculator before you fill the basket.",
+          "pinterest":"Cost to set up a 1-bed flat: estimate furniture, appliances, kitchen, cleaning and essentials with the free HomeFirst90 setup calculator.",
+          "youtube":"A one-bed flat can still burn through a setup budget fast because it's dozens of smaller purchases, not just a bed and sofa. HomeFirst90 has a free setup-cost calculator."
+        }
+    },
+    {
+        "key":"setup_3bed",
+        "topic":"Furnishing a three-bedroom house",
+        "hook":"Three bedrooms doesn't mean buying three rooms of furniture on day one.",
+        "destination":"/cost-to-furnish-3-bedroom-house.html",
+        "channels":["facebook","pinterest","youtube"],
+        "visual":"Three bedroom icons with only one highlighted 'day-one priority' and the others phased.",
+        "rationale":"Search Console already showed early interest around furnishing-house costs.",
+        "copy":{
+          "facebook":"Furnishing a three-bed house gets expensive quickly if every empty room feels urgent. Start with the rooms that need to function, phase the rest and keep a buffer. HomeFirst90 breaks down the setup cost and links into the free calculator.",
+          "pinterest":"3-bedroom house furnishing budget: phase the rooms instead of buying everything at once. See the HomeFirst90 cost breakdown and free setup calculator.",
+          "youtube":"Three empty bedrooms can make it feel like everything needs buying immediately. It doesn't. Prioritise the rooms that need to function first and phase the rest. HomeFirst90 has a free setup calculator."
+        }
+    },
+    {
+        "key":"buy_first_bed",
+        "topic":"Bed before sofa?",
+        "hook":"New home, limited budget: bed before sofa is usually a much easier decision than matching cushions.",
+        "destination":"/what-to-buy-first.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "visual":"Large BED card in 'Need now', sofa in 'Buy soon', decor in 'Can wait'.",
+        "rationale":"Simple, opinionated prioritisation hook that demonstrates the What To Buy First tool.",
+        "copy":{
+          "facebook":"Limited setup budget? Sort the things that make the home usable before the things that make it look finished. A decent place to sleep usually beats a perfect living room. HomeFirst90's free What To Buy First tool builds the order around your budget.",
+          "instagram":"Need now / Buy soon / Can wait. A new home doesn't have to look finished on day one. Let the free HomeFirst90 tool sort the shopping order around your budget.",
+          "pinterest":"What to buy first for a new home: prioritise function before finishing touches. Build your shopping order free with HomeFirst90.",
+          "youtube":"If the new-home budget is tight, buy what makes the place function before what makes it look finished. HomeFirst90's free What To Buy First tool sorts the priorities around your budget."
+        }
+    },
+    {
+        "key":"buy_first_emergency",
+        "topic":"Don't spend the whole setup budget",
+        "hook":"The quickest way to blow a new-home budget is to treat every empty space as an emergency.",
+        "destination":"/what-to-buy-first.html",
+        "channels":["facebook","instagram","pinterest"],
+        "visual":"Empty room icons with only essentials ticked; emergency-cash reserve locked.",
+        "rationale":"Clear pain point and strong 'prioritise, don't overbuy' positioning.",
+        "copy":{
+          "facebook":"Every empty room feels like a shopping list when you first move in. It isn't. Make the place functional, keep some cash back and let the rest wait. HomeFirst90's free What To Buy First tool helps sort the order.",
+          "instagram":"Empty room ≠ emergency. Get the essentials working, keep cash back and let some furniture wait. Free HomeFirst90 prioritiser.",
+          "pinterest":"New-home budget rule: an empty room is not automatically an urgent purchase. Prioritise essentials with the free HomeFirst90 What To Buy First tool."
+        }
+    },
+    {
+        "key":"planner_4weeks",
+        "topic":"Four weeks to moving day",
+        "hook":"Four weeks out is when a bit of boring admin starts saving a lot of last-minute grief.",
+        "destination":"/first-90-days-planner.html",
+        "channels":["facebook","instagram","pinterest"],
+        "visual":"4 weeks → 2 weeks → 1 week → day before timeline.",
+        "rationale":"Timely planning hook with a personalised planner destination.",
+        "copy":{
+          "facebook":"Four weeks until moving day? This is when the admin is worth doing: bookings, address changes, what you're taking, what you're buying and what can wait. HomeFirst90's free planner turns it into a short timeline.",
+          "instagram":"4 weeks → 2 weeks → 1 week → day before. Get the move out of your head and into a plan. Free personalised HomeFirst90 planner.",
+          "pinterest":"Four-week moving-home timeline: 4 weeks, 2 weeks, 1 week, day before. Build your personalised free HomeFirst90 plan."
+        }
+    },
+    {
+        "key":"planner_week",
+        "topic":"One week to moving day",
+        "hook":"One week to go? This is not the time to discover the move still lives in 14 different notes.",
+        "destination":"/first-90-days-planner.html",
+        "channels":["facebook","instagram","pinterest"],
+        "visual":"Seven-day countdown with a small focused checklist for each stage.",
+        "rationale":"High urgency and highly relevant to movers close to the conversion window.",
+        "copy":{
+          "facebook":"One week to moving day? Put the last jobs in one place: access, utilities/admin, essentials, packing priorities and what needs doing the day before. HomeFirst90's free planner builds the list around your move.",
+          "instagram":"7 days to go. Time to stop trusting your memory. Build the last-week move plan free with HomeFirst90.",
+          "pinterest":"One-week moving checklist: organise the final jobs before moving day with the free HomeFirst90 planner."
+        }
+    },
+    {
+        "key":"first_night",
+        "topic":"First-night box",
+        "hook":"Pack one box for the first night and future-you will be very grateful.",
+        "destination":"/first-night-new-home-essentials.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "visual":"Open box labelled FIRST NIGHT with sleep, bathroom, food, chargers, lighting, cleaning and keys icons.",
+        "rationale":"Strong save/share format and ideal for visual platforms.",
+        "copy":{
+          "facebook":"Pack one box that does not disappear into the pile: bedding, bathroom basics, food/drink, chargers, a light, cleaning bits and the important keys. HomeFirst90 has the full first-night checklist.",
+          "instagram":"The box you actually want to find on night one: bedding, bathroom basics, food, chargers, light, cleaning bits and keys. Save the full HomeFirst90 checklist.",
+          "pinterest":"First-night moving box checklist: bedding, bathroom, food/drink, chargers, lighting, cleaning and keys. Full list on HomeFirst90.",
+          "youtube":"One moving box should be impossible to lose: the first-night box. Bedding, bathroom basics, food, chargers, a light, cleaning bits and the important keys. HomeFirst90 has the full checklist."
+        }
+    },
+    {
+        "key":"first_48",
+        "topic":"First 48 hours after the keys",
+        "hook":"Got the keys? Before the furniture arguments begin, do the boring important stuff.",
+        "destination":"/first-48-hours-new-home.html",
+        "channels":["facebook","instagram","pinterest","youtube"],
+        "visual":"Key icon followed by four cards: meters, controls, alarms, doors/windows.",
+        "rationale":"Post-key handoff naturally introduces the paid first-90-days problem without hard-selling it.",
+        "copy":{
+          "facebook":"Got the keys? Before worrying about where the sofa goes, take meter photos, find the stopcock and consumer unit, check the alarms and make sure the doors/windows and keys all make sense. HomeFirst90 has the first-48-hours list in order.",
+          "instagram":"Keys collected? Do meters, controls, alarms and security before the nice stuff. HomeFirst90 has the first 48 hours mapped out.",
+          "pinterest":"First 48 hours in a new home: meters, controls, alarms, doors/windows, essentials and admin. Use the HomeFirst90 checklist.",
+          "youtube":"The first thing after getting the keys isn't decorating. Photograph the meters, find the stopcock and consumer unit, check alarms and sort doors, windows and keys. HomeFirst90 has the first 48 hours in order."
+        }
+    }
+]
+
+def _growth_used_keys(cur):
+    cur.execute("SELECT campaign_key,topic FROM hf90_growth_drafts")
+    rows=cur.fetchall()
+    keys=set()
+    topics=set()
+    for r in rows:
+        if r[0]: keys.add(str(r[0]))
+        if r[1]: topics.add(str(r[1]))
+    return keys,topics
+
+def generate_growth_draft():
+    conn=db()
+    cur=conn.cursor()
+    used,topics=_growth_used_keys(cur)
+    choice=None
+    for item in HF90_GROWTH_LIBRARY:
+        if item["key"] not in used and item["topic"] not in topics:
+            choice=item
+            break
+    if choice is None:
+        # Rotate the library after all angles have been used, but avoid the most recent one.
+        cur.execute("SELECT campaign_key FROM hf90_growth_drafts ORDER BY id DESC LIMIT 1")
+        row=cur.fetchone()
+        recent=str(row[0]) if row and row[0] else ""
+        choice=next((x for x in HF90_GROWTH_LIBRARY if x["key"]!=recent),HF90_GROWTH_LIBRARY[0])
+
+    channels=json.dumps(choice["channels"])
+    copies=json.dumps(choice["copy"])
+    note="tool-led library; approval required"
+    if is_postgres():
+        cur.execute("""
+            INSERT INTO hf90_growth_drafts
+              (status,topic,hook,destination_path,channels_json,copy_json,visual_brief,rationale,campaign_key,generation_note,created_at)
+            VALUES ('draft',%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s,%s,NOW())
+            RETURNING id
+        """,(choice["topic"],choice["hook"],choice["destination"],channels,copies,choice["visual"],choice["rationale"],choice["key"],note))
+        draft_id=cur.fetchone()[0]
+    else:
+        now=datetime.now(timezone.utc).isoformat()
+        cur.execute("""
+            INSERT INTO hf90_growth_drafts
+              (status,topic,hook,destination_path,channels_json,copy_json,visual_brief,rationale,campaign_key,generation_note,created_at)
+            VALUES ('draft',?,?,?,?,?,?,?,?,?,?)
+        """,(choice["topic"],choice["hook"],choice["destination"],channels,copies,choice["visual"],choice["rationale"],choice["key"],note,now))
+        draft_id=cur.lastrowid
+    conn.commit()
+    conn.close()
+    return draft_id
+
 def _growth_authorised():
     key = request.headers.get("X-Growth-Key", "")
     return bool(GROWTH_REVIEW_KEY and hmac.compare_digest(key, GROWTH_REVIEW_KEY))
@@ -642,7 +877,7 @@ def growth_agent_queue():
     cur = conn.cursor()
     cur.execute("""
         SELECT id,status,topic,hook,destination_path,channels_json,copy_json,
-               visual_brief,rationale,created_at,reviewed_at
+               visual_brief,rationale,created_at,reviewed_at,campaign_key,generation_note
         FROM hf90_growth_drafts
         ORDER BY CASE status WHEN 'draft' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, id DESC
         LIMIT 100
@@ -664,9 +899,69 @@ def growth_agent_queue():
             "channels":channels if isinstance(channels,list) else [],
             "copy":copies if isinstance(copies,dict) else {},
             "visual_brief":r[7] or "","rationale":r[8] or "",
-            "created_at":str(r[9]),"reviewed_at":str(r[10] or "")
+            "created_at":str(r[9]),"reviewed_at":str(r[10] or ""),
+            "campaign_key":r[11] or "","generation_note":r[12] or ""
         })
     return jsonify({"ok": True, "items": items})
+
+@app.route("/api/growth-agent/generate", methods=["POST","OPTIONS"])
+def growth_agent_generate():
+    if request.method=="OPTIONS":
+        return ("",204)
+    if not _growth_authorised():
+        return jsonify({"ok":False,"error":"unauthorised"}),401
+    try:
+        draft_id=generate_growth_draft()
+        return jsonify({"ok":True,"id":draft_id})
+    except Exception as e:
+        print("HF90_GROWTH_GENERATE_ERROR",type(e).__name__,str(e)[:300],flush=True)
+        return jsonify({"ok":False,"error":"could not generate draft"}),500
+
+@app.route("/api/growth-agent/visual/<int:draft_id>")
+def growth_agent_visual(draft_id):
+    if not _growth_authorised():
+        return ("unauthorised",401)
+    conn=db()
+    cur=conn.cursor()
+    if is_postgres():
+        cur.execute("SELECT topic,hook,destination_path FROM hf90_growth_drafts WHERE id=%s",(draft_id,))
+    else:
+        cur.execute("SELECT topic,hook,destination_path FROM hf90_growth_drafts WHERE id=?",(draft_id,))
+    row=cur.fetchone()
+    conn.close()
+    if not row:
+        return ("not found",404)
+    import html as _html
+    topic=_html.escape(str(row[0] or "HomeFirst90"))
+    hook=_html.escape(str(row[1] or ""))
+    dest=_html.escape(str(row[2] or "/"))
+    # Wrap headline into simple lines for a reusable vertical social card.
+    words=str(row[1] or "").split()
+    lines=[]; current=[]
+    for w in words:
+        if len(" ".join(current+[w]))>27 and current:
+            lines.append(" ".join(current)); current=[w]
+        else:
+            current.append(w)
+    if current: lines.append(" ".join(current))
+    lines=lines[:5]
+    text_lines="".join(f'<text x="64" y="{280+i*66}" class="headline">{_html.escape(line)}</text>' for i,line in enumerate(lines))
+    svg=f'''<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+      <rect width="1080" height="1350" fill="#f5f5f0"/>
+      <rect x="42" y="42" width="996" height="1266" rx="48" fill="#153f33"/>
+      <text x="64" y="112" fill="#d7e5de" font-family="Arial,sans-serif" font-size="30" font-weight="700">HOMEFIRST90</text>
+      <text x="64" y="180" fill="#ffffff" font-family="Arial,sans-serif" font-size="34" font-weight="700">{topic}</text>
+      <g fill="#ffffff" font-family="Arial,sans-serif" font-size="54" font-weight="800">{text_lines}</g>
+      <rect x="64" y="760" width="952" height="300" rx="34" fill="#ffffff"/>
+      <text x="104" y="835" fill="#153f33" font-family="Arial,sans-serif" font-size="28" font-weight="700">FREE HOME-MOVING TOOL</text>
+      <text x="104" y="905" fill="#17201d" font-family="Arial,sans-serif" font-size="42" font-weight="800">Plan it before you spend it.</text>
+      <text x="104" y="968" fill="#61706a" font-family="Arial,sans-serif" font-size="27">Budget • bills • setup • what to buy • moving plan</text>
+      <rect x="104" y="1115" width="480" height="92" rx="24" fill="#ffffff"/>
+      <text x="142" y="1174" fill="#153f33" font-family="Arial,sans-serif" font-size="30" font-weight="800">homefirst90.com</text>
+      <text x="64" y="1265" fill="#cfe0d8" font-family="Arial,sans-serif" font-size="24">{dest}</text>
+    </svg>'''
+    from flask import Response
+    return Response(svg,mimetype="image/svg+xml")
 
 @app.route("/api/growth-agent/action", methods=["POST","OPTIONS"])
 def growth_agent_action():
