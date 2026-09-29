@@ -326,7 +326,7 @@ def save_move():
         pass
     return jsonify({"ok": True, "move_date": move_date_raw})
 
-@app.route("/api/move/unsubscribe/<token>", methods=["GET"])
+@app.route("/api/move/unsubscribe/<token>", methods=["GET","POST"])
 def move_unsubscribe(token):
     if not token or len(token) > 128:
         return ("Invalid unsubscribe link.", 400)
