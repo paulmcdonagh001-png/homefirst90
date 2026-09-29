@@ -16,6 +16,73 @@ SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/homefirst90.db")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() == "true"
 
+COMPLETE_PLAN = [
+    {"name":"Moving day + first 48 hours","end":2,"tasks":[
+        ("meters","Take meter readings and photograph them","all"),
+        ("controls","Find the stopcock, fuse box / consumer unit and main controls","all"),
+        ("alarms","Check smoke and carbon-monoxide alarms","all"),
+        ("secure","Secure doors/windows and identify every key","all"),
+        ("essentials","Get sleeping, bathroom and basic kitchen essentials usable","scratch"),
+        ("inventory","Photograph condition and inventory issues","rent"),
+        ("petid","Update pet ID / microchip contact details","pets"),
+    ]},
+    {"name":"Week 1","end":7,"tasks":[
+        ("counciltax","Register / confirm council tax responsibility","all"),
+        ("utilities","Set up or confirm energy and water accounts","all"),
+        ("broadband","Get broadband working and test real speeds","all"),
+        ("gp","Register with a local GP if needed","all"),
+        ("wfh","Test home-working setup in real conditions","wfh"),
+        ("billsplit","Agree who pays which recurring bills","multi"),
+        ("repairs","Report tenancy repairs or inventory discrepancies in writing","rent"),
+    ]},
+    {"name":"Days 8–30","end":30,"tasks":[
+        ("realbills","Replace estimated bills with the first real household bills","all"),
+        ("nextbuy","Buy the next priority items without blowing the setup budget","scratch"),
+        ("bins","Check bins, recycling days and local collection rules","all"),
+        ("routine","Build a simple cleaning and maintenance routine","all"),
+        ("garden","Check garden boundaries, drainage and immediate maintenance","garden"),
+        ("subs","Review subscriptions and direct debits after the move","all"),
+    ]},
+    {"name":"Days 31–60","end":60,"tasks":[
+        ("rooms","Review rooms that still do not work properly before buying decoration","all"),
+        ("storage","Finish storage only where clutter is actually causing a problem","all"),
+        ("fund","Create a small home emergency / repair fund","all"),
+        ("serials","Record appliance model/serial details and keep key receipts","all"),
+        ("costs","Review commute, school and home-working costs","all"),
+    ]},
+    {"name":"Days 61–90","end":90,"tasks":[
+        ("budgetreview","Compare total setup spend with the original budget","all"),
+        ("declutter","Sell, donate or recycle duplicate items and moving clutter","all"),
+        ("maintenance","Set an ongoing annual home-maintenance allowance","own"),
+        ("landlord","List non-urgent landlord repairs to follow up","rent"),
+        ("energyreview","Check whether broadband/energy choices still suit actual usage","all"),
+        ("checkin","Do a final 90-day household check-in","multi"),
+    ]},
+]
+
+def complete_relevant(tag, profile):
+    if tag == "all":
+        return True
+    if tag == "rent":
+        return profile.get("tenure") == "rent"
+    if tag == "own":
+        return profile.get("tenure") == "own"
+    if tag == "pets":
+        return str(profile.get("pets")) == "1"
+    if tag == "wfh":
+        return str(profile.get("wfh")) == "1"
+    if tag == "garden":
+        return str(profile.get("garden")) == "1"
+    if tag == "scratch":
+        return str(profile.get("scratch")) == "1"
+    if tag == "multi":
+        try:
+            return int(profile.get("adults") or 0) > 1
+        except Exception:
+            return False
+    return False
+
+
 def is_postgres():
     return DATABASE_URL.startswith("postgres")
 
@@ -501,6 +568,34 @@ def access_verify():
     if not row:
         return jsonify({"active": False}), 401
     return jsonify({"active": True, "email": val(row, "email", 1)})
+
+@app.route("/api/complete/plan")
+def complete_plan():
+    init_db()
+    key = bearer_key()
+    row = row_for_key(key)
+    if not row:
+        return jsonify({"error": "unauthorised"}), 401
+    raw = val(row, "home_json", 5)
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except Exception:
+            raw = {}
+    if not isinstance(raw, dict):
+        raw = {}
+    profile = raw.get("homefirst90-move-profile") or {}
+    phases = []
+    total = 0
+    for phase in COMPLETE_PLAN:
+        tasks = [
+            {"id": task_id, "text": text}
+            for task_id, text, tag in phase["tasks"]
+            if complete_relevant(tag, profile)
+        ]
+        total += len(tasks)
+        phases.append({"name": phase["name"], "end": phase["end"], "tasks": tasks})
+    return jsonify({"phases": phases, "total": total})
 
 @app.route("/api/home", methods=["GET", "PUT", "OPTIONS"])
 def home():
