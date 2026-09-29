@@ -145,6 +145,7 @@ def init_db():
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         """)
+        cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN IF NOT EXISTS source TEXT")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id BIGSERIAL PRIMARY KEY,
@@ -224,6 +225,10 @@ def init_db():
             created_at TEXT NOT NULL
         )
         """)
+        try:
+            cur.execute("ALTER TABLE hf90_tester_applications ADD COLUMN source TEXT")
+        except Exception:
+            pass
         cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -552,7 +557,7 @@ def feedback_review():
         })
     if is_postgres():
         cur.execute("""
-            SELECT name,email,mover_stage,move_date,created_at
+            SELECT name,email,mover_stage,move_date,source,created_at
             FROM hf90_tester_applications
             ORDER BY created_at DESC
             LIMIT 200
@@ -571,7 +576,8 @@ def feedback_review():
         "email": r[1] or "",
         "mover_stage": r[2] or "",
         "move_date": str(r[3] or ""),
-        "created_at": str(r[4]),
+        "source": r[4] or "direct",
+        "created_at": str(r[5]),
     } for r in app_rows]
     return jsonify({"ok": True, "count": len(items), "applications": applications, "items": items})
 
@@ -589,6 +595,7 @@ def tester_apply():
     mover_stage = str(data.get("mover_stage") or "").strip()[:40]
     move_date_raw = str(data.get("move_date") or "").strip()
     consent = data.get("consent") is True
+    source = re.sub(r"[^a-zA-Z0-9_\-]", "", str(data.get("source") or ""))[:60] or "direct"
 
     if not EMAIL_RE.match(email):
         return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
@@ -655,12 +662,12 @@ def tester_apply():
         access_key = cur.fetchone()[0]
         cur.execute("""
             INSERT INTO hf90_tester_applications
-              (name,email,mover_stage,move_date,consent,entitlement_session_id,created_at)
-            VALUES (%s,%s,%s,%s,TRUE,%s,NOW())
+              (name,email,mover_stage,move_date,consent,entitlement_session_id,source,created_at)
+            VALUES (%s,%s,%s,%s,TRUE,%s,%s,NOW())
             ON CONFLICT (email) DO UPDATE SET
               name=EXCLUDED.name,mover_stage=EXCLUDED.mover_stage,move_date=EXCLUDED.move_date,
-              consent=TRUE,entitlement_session_id=EXCLUDED.entitlement_session_id
-        """, (name,email,mover_stage,move_date,session_id))
+              consent=TRUE,entitlement_session_id=EXCLUDED.entitlement_session_id,source=EXCLUDED.source
+        """, (name,email,mover_stage,move_date,session_id,source))
     else:
         cur.execute("""
             INSERT OR IGNORE INTO hf90_entitlements
@@ -671,12 +678,12 @@ def tester_apply():
         access_key = cur.fetchone()[0]
         cur.execute("""
             INSERT INTO hf90_tester_applications
-              (name,email,mover_stage,move_date,consent,entitlement_session_id,created_at)
-            VALUES (?,?,?,?,1,?,?)
+              (name,email,mover_stage,move_date,consent,entitlement_session_id,source,created_at)
+            VALUES (?,?,?,?,1,?,?,?)
             ON CONFLICT(email) DO UPDATE SET
               name=excluded.name,mover_stage=excluded.mover_stage,move_date=excluded.move_date,
-              consent=1,entitlement_session_id=excluded.entitlement_session_id
-        """, (name,email,mover_stage,move_date_raw or None,session_id,now))
+              consent=1,entitlement_session_id=excluded.entitlement_session_id,source=excluded.source
+        """, (name,email,mover_stage,move_date_raw or None,session_id,source,now))
 
     conn.commit()
     conn.close()
