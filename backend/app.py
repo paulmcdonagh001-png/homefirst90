@@ -15,6 +15,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/homefirst90.db")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 MOVE_REMINDERS_ENABLED = os.getenv("MOVE_REMINDERS_ENABLED", "false").lower() == "true"
+TESTER_INVITE_CODE = os.getenv("TESTER_INVITE_CODE", "")
+TESTER_LIMIT = int(os.getenv("TESTER_LIMIT", "20") or "20")
 
 COMPLETE_PLAN = [
     {"name":"Moving day + first 48 hours","end":2,"tasks":[
@@ -131,6 +133,21 @@ def init_db():
         )
         """)
         cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_feedback (
+            id BIGSERIAL PRIMARY KEY,
+            name TEXT,
+            email TEXT,
+            mover_stage TEXT,
+            rating INTEGER,
+            useful_text TEXT,
+            confusing_text TEXT,
+            would_pay TEXT,
+            quote_text TEXT,
+            permission_to_quote BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """)
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS hf90_move_leads (
             id BIGSERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
@@ -180,6 +197,21 @@ def init_db():
             run_date TEXT NOT NULL,
             created_at TEXT NOT NULL,
             PRIMARY KEY(job_name,run_date)
+        )
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS hf90_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT,
+            mover_stage TEXT,
+            rating INTEGER,
+            useful_text TEXT,
+            confusing_text TEXT,
+            would_pay TEXT,
+            quote_text TEXT,
+            permission_to_quote INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
         )
         """)
         cur.execute("""
@@ -293,7 +325,8 @@ def save_entitlement(session):
 ALLOWED_EVENTS = {
     "page_view","tool_run","tool_complete","home_saved",
     "complete_checkout_click","checkout_return",
-    "purchase_confirmed","complete_open","complete_access_restored","move_saved"
+    "purchase_confirmed","complete_open","complete_access_restored","move_saved",
+    "feedback_submitted","tester_access_granted"
 }
 
 def record_event(event_type, path="", session_key="", metadata=None):
@@ -432,6 +465,125 @@ def funnel_summary():
         "stages": stages,
         "sources": [{"source": k, "visitors": v} for k, v in sorted(source_counts.items(), key=lambda x: (-x[1], x[0]))],
     })
+
+
+@app.route("/api/tester-access", methods=["POST", "OPTIONS"])
+def tester_access():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    if not TESTER_INVITE_CODE:
+        return jsonify({"ok": False, "error": "Tester access is not enabled."}), 503
+    data = request.get_json(silent=True) or {}
+    if str(data.get("website") or "").strip():
+        return jsonify({"ok": True}), 200
+    email = str(data.get("email") or "").strip().lower()
+    code = str(data.get("code") or "").strip()
+    if not EMAIL_RE.match(email) or len(email) > 254:
+        return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
+    if not hmac.compare_digest(code, TESTER_INVITE_CODE):
+        return jsonify({"ok": False, "error": "That tester code is not valid."}), 403
+
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("SELECT session_id,access_key,active FROM hf90_entitlements WHERE email=%s AND customer_id=%s LIMIT 1", (email, "tester"))
+    else:
+        cur.execute("SELECT session_id,access_key,active FROM hf90_entitlements WHERE email=? AND customer_id=? LIMIT 1", (email, "tester"))
+    existing = cur.fetchone()
+    if existing:
+        key = existing[1]
+        active = bool(existing[2])
+        if not active:
+            if is_postgres():
+                cur.execute("UPDATE hf90_entitlements SET active=TRUE,updated_at=NOW() WHERE session_id=%s", (existing[0],))
+            else:
+                cur.execute("UPDATE hf90_entitlements SET active=1,updated_at=? WHERE session_id=?", (datetime.now(timezone.utc).isoformat(), existing[0]))
+            conn.commit()
+        conn.close()
+        return jsonify({"ok": True, "access_key": key, "existing": True})
+
+    if is_postgres():
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=%s", ("tester",))
+    else:
+        cur.execute("SELECT COUNT(*) FROM hf90_entitlements WHERE customer_id=?", ("tester",))
+    count = int(cur.fetchone()[0])
+    if count >= TESTER_LIMIT:
+        conn.close()
+        return jsonify({"ok": False, "error": "The Founding Tester places are full."}), 409
+
+    session_id = "tester_" + hashlib.sha256(email.encode()).hexdigest()[:24]
+    access_key = "hf90_" + secrets.token_urlsafe(28)
+    now = datetime.now(timezone.utc).isoformat()
+    if is_postgres():
+        cur.execute("""
+            INSERT INTO hf90_entitlements
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (%s,%s,%s,NULL,%s,TRUE,'{}'::jsonb,NOW(),NOW())
+            ON CONFLICT (session_id) DO NOTHING
+        """, (session_id, email, "tester", access_key))
+    else:
+        cur.execute("""
+            INSERT OR IGNORE INTO hf90_entitlements
+              (session_id,email,customer_id,payment_intent_id,access_key,active,home_json,created_at,updated_at)
+            VALUES (?,?,?,NULL,?,1,'{}',?,?)
+        """, (session_id, email, "tester", access_key, now, now))
+    conn.commit()
+    conn.close()
+    try:
+        record_event("tester_access_granted", "/tester.html", "", {"stage":"tester"})
+    except Exception:
+        pass
+    return jsonify({"ok": True, "access_key": access_key, "existing": False})
+
+
+@app.route("/api/feedback", methods=["POST", "OPTIONS"])
+def feedback():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    data = request.get_json(silent=True) or {}
+    if str(data.get("website") or "").strip():
+        return jsonify({"ok": True}), 200
+
+    name = str(data.get("name") or "").strip()[:100]
+    email = str(data.get("email") or "").strip().lower()[:254]
+    mover_stage = str(data.get("mover_stage") or "").strip()[:80]
+    useful_text = str(data.get("useful_text") or "").strip()[:4000]
+    confusing_text = str(data.get("confusing_text") or "").strip()[:4000]
+    would_pay = str(data.get("would_pay") or "").strip()[:20]
+    quote_text = str(data.get("quote_text") or "").strip()[:1000]
+    permission = data.get("permission_to_quote") is True
+    try:
+        rating = int(data.get("rating") or 0)
+    except Exception:
+        rating = 0
+    if rating < 1 or rating > 5:
+        return jsonify({"ok": False, "error": "Please choose a rating from 1 to 5."}), 400
+    if len(useful_text) < 5:
+        return jsonify({"ok": False, "error": "Please tell us what was useful."}), 400
+    if email and not EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Please enter a valid email address or leave it blank."}), 400
+
+    conn = db()
+    cur = conn.cursor()
+    if is_postgres():
+        cur.execute("""
+            INSERT INTO hf90_feedback
+              (name,email,mover_stage,rating,useful_text,confusing_text,would_pay,quote_text,permission_to_quote,created_at)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+        """, (name,email,mover_stage,rating,useful_text,confusing_text,would_pay,quote_text,permission))
+    else:
+        cur.execute("""
+            INSERT INTO hf90_feedback
+              (name,email,mover_stage,rating,useful_text,confusing_text,would_pay,quote_text,permission_to_quote,created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, (name,email,mover_stage,rating,useful_text,confusing_text,would_pay,quote_text,1 if permission else 0,datetime.now(timezone.utc).isoformat()))
+    conn.commit()
+    conn.close()
+    try:
+        record_event("feedback_submitted", "/feedback.html", "", {"stage":"tester_feedback"})
+    except Exception:
+        pass
+    return jsonify({"ok": True})
 
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
