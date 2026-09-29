@@ -86,27 +86,18 @@ const pre=[
 ]}
 ];
 
-const post=[
-{n:"Moving day + first 48 hours",d:2,t:[
-["Take meter readings and photograph them","all"],["Find the stopcock, fuse box / consumer unit and main controls","all"],["Check smoke and carbon-monoxide alarms","all"],["Secure doors/windows and identify every key","all"],["Get sleeping, bathroom and basic kitchen essentials usable","scratch"],["Photograph condition and inventory issues","rent"],["Update pet ID / microchip contact details","pets"]
-]},
-{n:"Week 1",d:7,t:[
-["Register / confirm council tax responsibility","all"],["Set up or confirm energy and water accounts","all"],["Get broadband working and test real speeds","all"],["Register with a local GP if needed","all"],["Test home-working setup in real conditions","wfh"],["Agree who pays which recurring bills","multi"],["Report tenancy repairs or inventory discrepancies in writing","rent"]
-]},
-{n:"Days 8–30",d:30,t:[
-["Replace estimated bills with the first real household bills","all"],["Buy the next priority items without blowing the setup budget","scratch"],["Check bins, recycling days and local collection rules","all"],["Build a simple cleaning and maintenance routine","all"],["Check garden boundaries, drainage and immediate maintenance","garden"],["Review subscriptions and direct debits after the move","all"]
-]},
-{n:"Days 31–60",d:60,t:[
-["Review rooms that still do not work properly before buying decoration","all"],["Finish storage only where clutter is actually causing a problem","all"],["Create a small home emergency / repair fund","all"],["Record appliance model/serial details and keep key receipts","all"],["Review commute, school and home-working costs","all"]
-]},
-{n:"Days 61–90",d:90,t:[
-["Compare total setup spend with the original budget","all"],["Sell, donate or recycle duplicate items and moving clutter","all"],["Set an ongoing annual home-maintenance allowance","own"],["List non-urgent landlord repairs to follow up","rent"],["Check whether broadband/energy choices still suit actual usage","all"],["Do a final 90-day household check-in","multi"]
-]}
+const postMeta=[
+{n:"Moving day + first 48 hours",c:{all:4,scratch:1,rent:1,pets:1}},
+{n:"Week 1",c:{all:4,wfh:1,multi:1,rent:1}},
+{n:"Days 8–30",c:{all:4,scratch:1,garden:1}},
+{n:"Days 31–60",c:{all:5}},
+{n:"Days 61–90",c:{all:3,own:1,rent:1,multi:1}}
 ];
 
 function isoToday(){return new Date().toISOString().slice(0,10)}
 function v(id){return document.querySelector("#"+id).value}
 function relevant(tag){return tag==="all"||tag==="rent"&&v("tenure")==="rent"||tag==="own"&&v("tenure")==="own"||tag==="children"&&v("children")==="1"||tag==="pets"&&v("pets")==="1"||tag==="wfh"&&v("wfh")==="1"||tag==="garden"&&v("garden")==="1"||tag==="scratch"&&v("scratch")==="1"||tag==="multi"&&(+v("adults")>1)}
+function postCount(p){return Object.entries(p.c).reduce((sum,[tag,n])=>sum+((tag==="all"||relevant(tag))?n:0),0)}
 function addDays(s,n){const [y,m,d]=s.split("-").map(Number),dt=new Date(Date.UTC(y,m-1,d));dt.setUTCDate(dt.getUTCDate()+n);return dt.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})}
 function dayDiff(s){const [y,m,d]=s.split("-").map(Number);const target=new Date(y,m-1,d),today=new Date();today.setHours(0,0,0,0);return Math.round((target-today)/86400000)}
 function build(save=true){
@@ -115,9 +106,9 @@ function build(save=true){
  document.querySelector("#plan").innerHTML=html;
  document.querySelector("#period").textContent="Moving day: "+addDays(date,0);
  document.querySelector("#countdown").textContent=days>1?days+" days until moving day":days===1?"Moving tomorrow":days===0?"Moving day is today":Math.abs(days)+" days since moving day";
- const locks=post.map(p=>{const tasks=p.t.filter(x=>relevant(x[1]));const sample=tasks[0]?tasks[0][0]:"Your personalised next steps";return '<div class="lockbox"><b>🔒 '+p.n+'</b><span>'+tasks.length+' personalised actions ready</span><div class="sample">Example: '+sample+'</div></div>'}).join("");
+ const locks=postMeta.map(p=>{const count=postCount(p);return '<div class="lockbox"><b>🔒 '+p.n+'</b><span>'+count+' personalised actions ready</span><div class="sample">Available in Complete after you get the keys.</div></div>'}).join("");
  document.querySelector("#locked").innerHTML=locks;
- const total=post.reduce((n,p)=>n+p.t.filter(x=>relevant(x[1])).length,0);
+ const total=postMeta.reduce((n,p)=>n+postCount(p),0);
  document.querySelector("#completeIntro").textContent="Based on this household, "+total+" post-move actions are ready from moving day through day 90. Complete adds the actual plan, progress tracking, purchase tracking, sharing and “what should I do next?”";
  if(save){
    const profile={date,tenure:v("tenure"),adults:v("adults"),children:v("children"),pets:v("pets"),wfh:v("wfh"),garden:v("garden"),scratch:v("scratch"),postActionCount:total};
