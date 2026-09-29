@@ -15,6 +15,7 @@
 <div><select id="days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">365 days</option></select> <button id="refresh">Refresh</button></div></div>
 <div id="status" class="muted" style="margin-top:10px">Loading…</div>
 <section id="cards" class="grid"></section>
+<section class="section"><h2 style="margin-top:0">Founding Tester progress</h2><div id="testerStatus" class="muted">Loading tester status…</div></section>
 <section class="section"><h2 style="margin-top:0">Full funnel</h2><div class="row head"><div>Stage</div><div>Count</div><div>From previous</div><div>From visitors</div></div><div id="rows"></div></section>
 <section class="section"><h2 style="margin-top:0">Visitor sources</h2><div id="sources"></div></section>
 </main>
@@ -22,6 +23,13 @@
 const API="https://homefirst90-api.onrender.com";
 const labels={visitors:"Visitors",tool_starts:"Tool starts",tool_completions:"Tool completions",homes_saved:"Homes saved",emails_captured:"Moves/emails captured",complete_views:"Complete page views",checkout_starts:"Checkout starts",purchases:"Purchases"};
 const pct=v=>v==null?"—":v+"%";
+async function loadTester(){
+ try{
+  const r=await fetch(API+"/api/tester-status");
+  const d=await r.json(); if(!r.ok)throw new Error();
+  document.querySelector("#testerStatus").innerHTML='<b>'+d.used+' / '+d.limit+'</b> places used · <b>'+d.remaining+'</b> remaining · <b>'+d.feedback_received+'</b> feedback responses · <b>'+d.quotable_feedback+'</b> permitted testimonials';
+ }catch(e){document.querySelector("#testerStatus").textContent="Tester status unavailable."}
+}
 async function load(){
  const days=document.querySelector("#days").value;
  const status=document.querySelector("#status"); status.textContent="Loading…";
@@ -36,5 +44,5 @@ async function load(){
 }
 document.querySelector("#refresh").addEventListener("click",load);
 document.querySelector("#days").addEventListener("change",load);
-load();
+load();loadTester();
 </script></body></html>
