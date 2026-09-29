@@ -90,6 +90,8 @@ Goal: get genuine movers into the funnel organically, learn which acquisition ch
 - [x] HomeFirst90 Growth Agent brain + persistent approval queue live
 - [x] Growth Agent channel/campaign performance learning dashboard
 - [x] Guarded automatic draft generation (pauses when 3 drafts await approval)
+- [x] Scheduled Growth Agent heartbeat workflow committed for Monday / Wednesday / Friday
+- [ ] Connect GitHub Actions secret `HF90_GROWTH_REVIEW_KEY` so scheduled heartbeat can authenticate
 - [x] Five initial calculator-led acquisition drafts seeded for training
 - [x] Automated tester feedback follow-up after 3 days if no feedback has been submitted
 - [x] Personal Facebook tester post launched
